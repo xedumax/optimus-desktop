@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="450.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.yobel.optimus.controller.MenuController">
+    <children>
+        <MenuBar>
+            <menus>
+                <Menu text="_Procesos">
+                    <items>
+                          <MenuItem text="Lectura Empaques" onAction="#abrirLecturaEmpaques"/>
+                    </items>
+                </Menu>
+                <Menu text="_Etiquetas Generales">
+                    <items>
+                        <MenuItem text="Configuración" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+
+        <AnchorPane fx:id="contentArea" VBox.vgrow="ALWAYS">
+            <children>
+            </children>
+        </AnchorPane>
+    </children>
+</VBox>

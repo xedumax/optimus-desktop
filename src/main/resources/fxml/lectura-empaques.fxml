@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yobel.optimus.controller.LecturaController">
+    <padding><Insets top="30" left="40" right="40" /></padding>
+
+    <Text text="LECTURA DE EMPAQUES" style="-fx-font-size: 28; -fx-font-weight: bold;" />
+
+    <GridPane vgap="15" hgap="10" alignment="CENTER">
+        <Label text="Cuenta :" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-size: 16;" />
+        <ComboBox fx:id="cbCuenta" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="AGP :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 16;" />
+        <ComboBox fx:id="cbAgp" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Fecha de Proceso :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-size: 16;" />
+        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
+
+            <DatePicker fx:id="dpFecha" editable="false" prefWidth="150" promptText="Seleccione fecha" />
+
+        </HBox>
+
+        <Label text="Ventana :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-size: 16;" />
+        <TextField fx:id="txtVentana" prefWidth="60" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="60" />
+
+        <Button text="Sincronizar" style="-fx-background-color: black; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-size: 18; -fx-padding: 8 30;"
+                GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2" />
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Label text="Pedido :" style="-fx-font-size: 24; -fx-font-weight: bold;" />
+        <TextField fx:id="txtPedido" prefHeight="50" prefWidth="450" style="-fx-border-color: #7a8a99;" />
+    </HBox>
+</VBox>

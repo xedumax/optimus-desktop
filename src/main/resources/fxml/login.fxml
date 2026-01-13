@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox alignment="TOP_CENTER" spacing="10.0" style="-fx-background-color: white;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.yobel.optimus.controller.LoginController">
+
+    <children>
+        <ImageView fitWidth="200.0" preserveRatio="true">
+            <image>
+                <Image url="@../images/yobel-logo.png" />
+            </image>
+            <VBox.margin><Insets top="40" bottom="10"/></VBox.margin>
+        </ImageView>
+
+        <Label text="Optimus" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-font-family: 'Segoe UI';" />
+        <Label text="HERRAMIENTAS DE SOPORTE" style="-fx-font-size: 14; -fx-text-fill: #555;" />
+
+        <VBox alignment="CENTER_LEFT" maxWidth="350" spacing="15">
+            <padding><Insets top="20" /></padding>
+            <Label text="Inicie sesión con sus credenciales." style="-fx-text-fill: #9a6d4d;" />
+
+            <TextField fx:id="txtUsuario" prefHeight="45" promptText="Usuario *"
+                       style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;" />
+
+            <PasswordField fx:id="txtClave" prefHeight="45" promptText="Clave *"
+                           style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;" />
+
+            <Button fx:id="btnIniciar" onAction="#onLoginClick" prefHeight="45" prefWidth="350" text="INICIAR SESIÓN"
+                    style="-fx-background-color: black; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-cursor: hand;" />
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <ImageView fitWidth="500.0" preserveRatio="true">
+            <image>
+                <Image url="@../images/yobel-footer.png" />
+            </image>
+        </ImageView>
+    </children>
+</VBox>
