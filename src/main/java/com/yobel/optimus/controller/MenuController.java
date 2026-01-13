@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class MenuController {
 
-
     @FXML
     private AnchorPane contentArea;
 
@@ -21,7 +20,12 @@ public class MenuController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/lectura-empaques.fxml"));
             Node view = loader.load();
 
-            // Limpiar y cargar en el área central
+            // 1. Obtener el controlador de la vista de lectura
+            LecturaController controller = loader.getController();
+
+            // 2. Pasarle la referencia del AnchorPane (el contenedor central)
+            controller.setMainContentArea(contentArea);
+
             contentArea.getChildren().setAll(view);
 
             // Ajustar al tamaño del contenedor

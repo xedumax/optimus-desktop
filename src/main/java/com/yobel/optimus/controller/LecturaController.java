@@ -1,35 +1,44 @@
 package com.yobel.optimus.controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.function.UnaryOperator;
 
 public class LecturaController {
     @FXML private ComboBox<String> cbCuenta;
     @FXML private ComboBox<String> cbAgp;
-
-    @FXML private TextField txtFecha;
     @FXML private DatePicker dpFecha;
-
     @FXML private TextField txtVentana;
     @FXML private TextField txtPedido;
+    private AnchorPane mainContentArea; // Esta variable guardará la referencia al área central del menú
 
     @FXML
     public void initialize() {
         // Aquí puedes cargar datos iniciales en los ComboBox
-        //configurarFormatoFecha(); <TextField fx:id="txtFecha" prefWidth="120" />
         configurarDatePicker();
-        // Bloquea la edición manual del texto, pero permite abrir el calendario
-        dpFecha.getEditor().setEditable(false);
 
-        // Opcional: Evitar que el campo reciba el foco del teclado
-        dpFecha.getEditor().setFocusTraversable(false);
+        dpFecha.getEditor().setEditable(false);// Bloquea la edición manual del texto, pero permite abrir el calendario
+        dpFecha.getEditor().setFocusTraversable(false);// Opcional: Evitar que el campo reciba el foco del teclado
+    }
+
+    @FXML
+    private void volverAlMenu() {
+        limpiarCampos();
+
+        // Obtenemos el contenedor principal (contentArea) y removemos esta vista
+        if (mainContentArea != null) {
+            mainContentArea.getChildren().clear();
+        }
+    }
+
+    private void limpiarCampos() {
+        txtPedido.clear();
+        dpFecha.setValue(null);
+        // Limpiar ComboBoxes si es necesario
     }
 
     private void configurarDatePicker() {
@@ -58,17 +67,7 @@ public class LecturaController {
         dpFecha.setValue(LocalDate.now());
     }
 
-    @FXML
-    private void cerrarVentana(ActionEvent event) {
-        // 1. Limpiar los campos (por seguridad)
-        cbCuenta.getSelectionModel().clearSelection();
-        cbAgp.getSelectionModel().clearSelection();
-        txtVentana.clear();
-        txtPedido.clear();
-        dpFecha.setValue(null);
-
-        // 2. Cerrar la ventana actual
-        Stage stage = (Stage) txtPedido.getScene().getWindow();
-        stage.close();
+    public void setMainContentArea(AnchorPane area) {
+        this.mainContentArea = area;
     }
 }

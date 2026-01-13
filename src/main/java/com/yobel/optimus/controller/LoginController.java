@@ -4,10 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -15,7 +12,29 @@ import java.io.IOException;
 public class LoginController {
     @FXML private TextField txtUsuario;
     @FXML private PasswordField txtClave;
+    @FXML private TextField txtClaveVisible;
+    @FXML private ToggleButton btnVerClave;
+    @FXML private Label lblIconoOjo;
     @FXML private Button btnIniciar;
+
+    @FXML
+    public void initialize() {
+        // Vincula los textos de ambos campos para que siempre sean iguales
+        txtClaveVisible.textProperty().bindBidirectional(txtClave.textProperty());
+    }
+
+    @FXML
+    private void togglePassword() {
+        if (btnVerClave.isSelected()) {
+            txtClaveVisible.setVisible(true);
+            txtClave.setVisible(false);
+            lblIconoOjo.setText("🔒"); // O cambia por el icono de ojo tachado
+        } else {
+            txtClaveVisible.setVisible(false);
+            txtClave.setVisible(true);
+            lblIconoOjo.setText("👁");
+        }
+    }
 
     @FXML
     protected void onLoginClick() {
@@ -37,11 +56,11 @@ public class LoginController {
                     // 2. Obtener el Stage actual usando el botón de login
                     Stage stage = (Stage) btnIniciar.getScene().getWindow();
 
-                    // 3. Configurar la nueva escena
+                    // 3. Configurar scene
                     Scene scene = new Scene(root);
                     stage.setScene(scene);
                     stage.setTitle("Optimus - Herramientas");
-                    stage.setResizable(true); // El menú suele requerir más espacio
+                    stage.setResizable(true);
                     stage.centerOnScreen();
                     stage.show();
 
@@ -49,10 +68,6 @@ public class LoginController {
                     e.printStackTrace();
                     mostrarAlerta("Error", "No se pudo cargar el menú principal.");
                 }
-
-
-
-
 
             } else {
                 mostrarAlerta("Error", "Usuario o clave incorrectos.");
@@ -66,5 +81,9 @@ public class LoginController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private String getPassword() {
+        return txtClave.getText();
     }
 }

@@ -1,2 +1,4 @@
 
-r	java:S106"+Replace this use of System.out by a logger.(®Âù“şÿÿÿÿ8µÙ¾»3J$cfad3905-c70a-4a7c-8459-4132e26a5257
+r	java:S1061"+Replace this use of System.out by a logger.(®Âù“şÿÿÿÿ8µÙ¾»3J$cf8f47bf-97ac-46f1-941e-c75c9eed08b3
+s
+java:S1144V"0Remove this unused private "getPassword" method.(ôŠµæ8ÎØÄ»3J$5eeffd5b-e1d3-4914-bb55-1770200c95ba

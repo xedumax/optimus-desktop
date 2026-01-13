@@ -36,4 +36,8 @@
         <Label text="Pedido :" style="-fx-font-size: 24; -fx-font-weight: bold;" />
         <TextField fx:id="txtPedido" prefHeight="50" prefWidth="450" style="-fx-border-color: #7a8a99;" />
     </HBox>
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="VOLVER" onAction="#volverAlMenu"
+                style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" />
+    </HBox>
 </VBox>

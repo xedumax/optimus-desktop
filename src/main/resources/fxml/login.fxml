@@ -4,7 +4,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
-
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
@@ -13,7 +12,7 @@
       fx:controller="com.yobel.optimus.controller.LoginController">
 
     <children>
-        <ImageView fitWidth="200.0" preserveRatio="true">
+        <ImageView fitWidth="300.0" preserveRatio="true">
             <image>
                 <Image url="@../images/yobel-logo.png" />
             </image>
@@ -25,13 +24,30 @@
 
         <VBox alignment="CENTER_LEFT" maxWidth="350" spacing="15">
             <padding><Insets top="20" /></padding>
-            <Label text="Inicie sesión con sus credenciales." style="-fx-text-fill: #9a6d4d;" />
+            <Label text="Inicie sesión con sus credenciales."  />
 
             <TextField fx:id="txtUsuario" prefHeight="45" promptText="Usuario *"
                        style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;" />
 
-            <PasswordField fx:id="txtClave" prefHeight="45" promptText="Clave *"
-                           style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;" />
+            <StackPane alignment="CENTER_RIGHT">
+                <children>
+                    <TextField fx:id="txtClaveVisible" visible="false" prefHeight="45"
+                               style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 0 40 0 10;" />
+
+                    <PasswordField fx:id="txtClave" prefHeight="45" promptText="Clave *"
+                                   style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 0 40 0 10;" />
+
+                    <ToggleButton fx:id="btnVerClave" onAction="#togglePassword"
+                                  style="-fx-background-color: transparent; -fx-cursor: hand;">
+                        <graphic>
+                            <Label fx:id="lblIconoOjo" text="👁" style="-fx-font-size: 18; -fx-text-fill: #555;"/>
+                        </graphic>
+                        <StackPane.margin>
+                            <Insets right="10.0" />
+                        </StackPane.margin>
+                    </ToggleButton>
+                </children>
+            </StackPane>
 
             <Button fx:id="btnIniciar" onAction="#onLoginClick" prefHeight="45" prefWidth="350" text="INICIAR SESIÓN"
                     style="-fx-background-color: black; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-cursor: hand;" />
