@@ -61,7 +61,6 @@ public class ConfigManager {
         return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
 
-    // Métodos específicos para tu aplicación
 
     public String getAppName() {
         return getProperty("app.name", "Optimus");

@@ -1,6 +1,6 @@
 
 á
-java:S6548"˜A Singleton implementation was detected. Make sure the use of the Singleton pattern is required and the implementation is the right one for the context.(·éÎñûÿÿÿÿ8Žã‹Á»3J$1217cf43-6f70-44e8-b073-089d1dc03e55
-r	java:S106"+Replace this use of System.err by a logger.(ëâˆÏúÿÿÿÿ8’ã‹Á»3J$207eb84c-1257-4439-8606-e9f0b782ae45
-m	java:S106#"+Replace this use of System.out by a logger.(†Ÿˆë8“ã‹Á»3J$7fcd0f00-b423-4ecf-8c71-c33b2bf4d89d
-r	java:S106&"+Replace this use of System.err by a logger.(¸äÕ¢ùÿÿÿÿ8“ã‹Á»3J$5f96e784-4b2d-4687-a3ef-d25504378451
+java:S6548"˜A Singleton implementation was detected. Make sure the use of the Singleton pattern is required and the implementation is the right one for the context.(·éÎñûÿÿÿÿ8Žã‹Á»3J$b5427fa7-225e-4791-8115-5957f3fb8ebc
+r	java:S106"+Replace this use of System.err by a logger.(ëâˆÏúÿÿÿÿ8’ã‹Á»3J$7a50cc1f-959c-438b-81f1-4f6a2e755f55
+m	java:S106#"+Replace this use of System.out by a logger.(†Ÿˆë8“ã‹Á»3J$c3bea347-4ce5-458c-ab59-6ee7e8f9e8d3
+r	java:S106&"+Replace this use of System.err by a logger.(¸äÕ¢ùÿÿÿÿ8“ã‹Á»3J$187679a4-429d-4246-9b19-3dd2c02143df

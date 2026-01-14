@@ -1,3 +1,16 @@
 
-…
-java:S2094"BRemove this empty class, write its code or make it an "interface".(»ß›ö8©³»¾»3J$3f33743b-b008-4371-9446-256f59d43d48
+
+java:S1192+"KDefine a constant instead of duplicating this literal "User-Agent" 3 times.(ûô¢ô8·ê¼é»3J$2300e099-fe93-4c78-8214-95870bd7983e
+–
+java:S1192*"NDefine a constant instead of duplicating this literal "Authorization" 4 times.(ªøâ±úÿÿÿÿ8¸ê¼é»3J$897bb797-7839-40e4-9e58-0a4fda542110
+
+java:S1192*"HDefine a constant instead of duplicating this literal "Bearer " 4 times.(ªøâ±úÿÿÿÿ8¸ê¼é»3J$e26e50f3-dff4-4764-a331-58f4a58fc468
+™
+java:S1192+"VDefine a constant instead of duplicating this literal "PostmanRuntime/7.40.0" 3 times.(ûô¢ô8¸ê¼é»3J$0f3cc4f1-f1c7-4209-aafe-ca49be977c5b
+m	java:S1063"+Replace this use of System.err by a logger.(‡¶éì8Ñ¼Âè»3J$63514813-5a00-4207-8e40-6869b988fe9a
+m	java:S1064"+Replace this use of System.err by a logger.(ÓÇÌİ8Ñ¼Âè»3J$48265ce5-827f-498a-9f0b-190254b73952
+r	java:S1065"+Replace this use of System.err by a logger.(‡’‘ùÿÿÿÿ8Ñ¼Âè»3J$48c5dc6a-36e8-44c5-9791-f81ce35deb07
+Â
+java:S6204]"zReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()' and ensure that the list is unmodified.(Ü¤÷‰úÿÿÿÿ8úÙ£í»3J$2d786d63-cb28-4b47-9b1b-3b4de247263b
+‚
+java:S1117~":Rename "client" which hides the field declared at line 24.(¨ÚÔıÿÿÿÿ8êÆÆì»3J$8f0aed4c-714b-48c4-a94b-c164ed001235

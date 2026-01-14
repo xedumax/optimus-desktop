@@ -5,39 +5,58 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yobel.optimus.controller.LecturaController">
     <padding><Insets top="30" left="40" right="40" /></padding>
+
+    <HBox alignment="TOP_RIGHT">
+        <Button text="VOLVER" onAction="#volverAlMenu"
+                style="-fx-background-color: #455a64; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 5 20; -fx-cursor: hand;" />
+    </HBox>
 
     <Text text="LECTURA DE EMPAQUES" style="-fx-font-size: 28; -fx-font-weight: bold;" />
 
     <GridPane vgap="15" hgap="10" alignment="CENTER">
         <Label text="Cuenta :" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-size: 16;" />
-        <ComboBox fx:id="cbCuenta" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <ComboBox fx:id="cbCuenta" onAction="#onCuentaSelected" promptText="Seleccione Cuenta" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
         <Label text="AGP :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 16;" />
-        <ComboBox fx:id="cbAgp" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <ComboBox fx:id="cbAgp" onAction="#onAgpSelected" promptText="Seleccione Agrupador" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
         <Label text="Fecha de Proceso :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-size: 16;" />
         <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
-
-            <DatePicker fx:id="dpFecha" editable="false" prefWidth="150" promptText="Seleccione fecha" />
-
+            <DatePicker fx:id="dpFecha" editable="false" prefWidth="200" promptText="Seleccione fecha" />
         </HBox>
 
         <Label text="Ventana :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-size: 16;" />
-        <TextField fx:id="txtVentana" prefWidth="60" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="60" />
+        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <TextField fx:id="txtVentana" editable="false" focusTraversable="false" prefWidth="200" />
+        </HBox>
 
-        <Button text="Sincronizar" style="-fx-background-color: black; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-size: 18; -fx-padding: 8 30;"
-                GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2" />
+        <Label text="Pedido :" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="2">
+            <TextField fx:id="txtPedido" prefWidth="350" prefHeight="40" style="-fx-font-size: 16;" promptText="Escanee código..." />
+            <Button fx:id="btnQr" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                <graphic>
+                    <ImageView fitHeight="40" fitWidth="40" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/qr-icon.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <Label fx:id="lblInfoEmpaque"
+               text="Esperando lectura..."
+               textFill="#28a745"
+               wrapText="true"
+               minHeight="50"
+               maxWidth="400"
+               GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="2"
+               style="-fx-font-size: 14; -fx-font-weight: bold; -fx-font-family: 'Monospaced';" />
+
     </GridPane>
-
-    <HBox spacing="15" alignment="CENTER">
-        <Label text="Pedido :" style="-fx-font-size: 24; -fx-font-weight: bold;" />
-        <TextField fx:id="txtPedido" prefHeight="50" prefWidth="450" style="-fx-border-color: #7a8a99;" />
-    </HBox>
-    <HBox alignment="CENTER_RIGHT">
-        <Button text="VOLVER" onAction="#volverAlMenu"
-                style="-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" />
-    </HBox>
 </VBox>

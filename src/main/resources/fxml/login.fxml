@@ -49,9 +49,17 @@
                 </children>
             </StackPane>
 
+            <ComboBox fx:id="cbAmbiente" prefHeight="45" prefWidth="350" promptText="Entorno"
+                      style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;
+                             -fx-font-family: 'Segoe UI'; -fx-font-size: 14;" />
+
             <Button fx:id="btnIniciar" onAction="#onLoginClick" prefHeight="45" prefWidth="350" text="INICIAR SESIÓN"
                     style="-fx-background-color: black; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-cursor: hand;" />
+
+
         </VBox>
+
+
 
         <Region VBox.vgrow="ALWAYS" />
 

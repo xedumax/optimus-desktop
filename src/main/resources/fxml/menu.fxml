@@ -15,7 +15,7 @@
                 </Menu>
                 <Menu text="_Etiquetas Generales">
                     <items>
-                        <MenuItem text="Configuración" />
+                        <MenuItem text="Imprimir Etiquetas" />
                     </items>
                 </Menu>
             </menus>
