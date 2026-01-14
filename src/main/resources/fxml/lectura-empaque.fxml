@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yobel.optimus.controller.LecturaController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yobel.optimus.controller.LecturaEmpaqueController">
     <padding><Insets top="30" left="40" right="40" /></padding>
 
     <HBox alignment="TOP_RIGHT">

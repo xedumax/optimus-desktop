@@ -24,7 +24,7 @@ public class AppConfig {
             return getBaseUrl() + "/api/msi/autorizacion/auth/login";
         }
         public static String sistemas() {
-            return getBaseUrl() + "/api/auth/sistemas";
+            return getBaseUrl() + "/api/msi/autorizacion/system";
         }
     }
 
@@ -33,10 +33,10 @@ public class AppConfig {
             return getBaseUrl() + "/api/prd/matriz/agrupadorProduccion/listSel/001";
         }
         public static String cuentas() {
-            return getBaseUrl() + "/api/prd/matriz/cuenta/listSel/1";
+            return getBaseUrl() + "/api/dyt/gestion-cuentas/listAll";
         }
         public static String ventanas() {
-            return getBaseUrl() + "/api/prd/matriz/ventana/listByCuenta/";
+            return getBaseUrl() + "/api/dyt/gestion-maestros/ventanaDsp/list/";
         }
     }
 

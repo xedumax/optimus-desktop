@@ -1,12 +1,4 @@
 
 ‰
-java:S1192X"FDefine a constant instead of duplicating this literal "token" 3 times.(ÃÛÁ8œØ¨ó»3J$8dc89987-808b-4bd9-97b5-2eef3d0e1406
-r	java:S106b"+Replace this use of System.out by a logger.(–¼Ÿ¿ÿÿÿÿÿ8²Ø¨ó»3J$db523d3b-8bd5-4cc8-afca-20806cf544ea
-U
-java:S1128"3Remove this unused import 'javafx.fxml.FXMLLoader'.(À‡ô³úÿÿÿÿ8œÏ‘õ»3
-M
-java:S1128"0Remove this unused import 'javafx.scene.Parent'.(²ä¡È8œÏ‘õ»3
-L
-java:S1128"/Remove this unused import 'javafx.scene.Scene'.(Õü²8œÏ‘õ»3
-Q
-java:S1128"/Remove this unused import 'javafx.stage.Stage'.(æÄ¸²úÿÿÿÿ8œÏ‘õ»3
+java:S1192T"FDefine a constant instead of duplicating this literal "token" 3 times.(ÃÛÁ8œØ¨ó»3J$59c7693b-fcf0-4f83-90f7-70bb2c551258
+r	java:S106^"+Replace this use of System.out by a logger.(–¼Ÿ¿ÿÿÿÿÿ8²Ø¨ó»3J$e00a73d2-ce54-46ca-8df6-15ba89070397

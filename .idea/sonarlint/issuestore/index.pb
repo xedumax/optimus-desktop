@@ -75,3 +75,10 @@ h
 8src/main/java/com/yobel/optimus/util/NavigationUtil.java,6\e\6ee53d7a924b33804e40b268e2a0dd1ad763d080
 o
 ?src/main/java/com/yobel/optimus/model/request/LoginRequest.java,2\b\2bf398b564b378f48cb09e21e8069ecfaeb9b69c
+:
+
+.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
+r
+Bsrc/main/java/com/yobel/optimus/service/LecturaEmpaqueService.java,5\1\517a44ae2e9b44d76a9a9abb4edb531c09a534c5
+x
+Hsrc/main/java/com/yobel/optimus/controller/LecturaEmpaqueController.java,7\a\7af0d38d42c38fcea268196fccfa2fe5159deab8

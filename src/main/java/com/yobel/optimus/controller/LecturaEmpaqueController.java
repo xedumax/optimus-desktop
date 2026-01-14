@@ -4,7 +4,7 @@ import com.yobel.optimus.model.entity.Agrupador;
 import com.yobel.optimus.model.entity.Cuenta;
 import com.yobel.optimus.model.entity.Ventana;
 import com.yobel.optimus.model.request.LecturaRequest;
-import com.yobel.optimus.service.BarcodeService;
+import com.yobel.optimus.service.LecturaEmpaqueService;
 import com.yobel.optimus.util.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-public class LecturaController {
+public class LecturaEmpaqueController {
     @FXML private ComboBox<Cuenta> cbCuenta;
     @FXML private ComboBox<Agrupador> cbAgp;
     @FXML private TextField txtVentana, txtPedido;
@@ -28,7 +28,7 @@ public class LecturaController {
     @FXML private Button btnQr;
 
     private AnchorPane mainContentArea;
-    private BarcodeService barcodeService = new BarcodeService(new OkHttpClient());
+    private LecturaEmpaqueService lecturaEmpaqueService = new LecturaEmpaqueService(new OkHttpClient());
 
     @FXML
     public void initialize() {
@@ -48,7 +48,7 @@ public class LecturaController {
         String token = AppContext.getToken();
         new Thread(() -> {
             try {
-                List<Cuenta> listaFiltrada = barcodeService.getCuentas(token);
+                List<Cuenta> listaFiltrada = lecturaEmpaqueService.getCuentas(AppConfig.Maestros.cuentas());
                 Platform.runLater(() -> {
                     if (listaFiltrada != null && !listaFiltrada.isEmpty()) {
                         cbCuenta.getItems().setAll(listaFiltrada);
@@ -68,7 +68,7 @@ public class LecturaController {
         new Thread(() -> {
             try {
                 // 1. Obtenemos la lista desde el servicio
-                List<Agrupador> lista = barcodeService.getAgrupadores(token);
+                List<Agrupador> lista = lecturaEmpaqueService.getAgrupadores(AppConfig.Maestros.agrupadores());
 
                 // 2. Actualizamos la UI en el hilo principal
                 Platform.runLater(() -> {
@@ -118,7 +118,7 @@ public class LecturaController {
         String token = AppContext.getToken();
         new Thread(() -> {
             try {
-                List<Ventana> todas = barcodeService.getVentanas(token, codCuenta);
+                List<Ventana> todas = lecturaEmpaqueService.getVentanas(AppConfig.Maestros.ventanas()+codCuenta);
                 Optional<Ventana> ventanaMatch = todas.stream()
                         .filter(v -> filtroAgp.equals(v.getAgpCuenta()) && "A".equals(v.getEstado()))
                         .findFirst();
@@ -202,7 +202,7 @@ public class LecturaController {
         String token = AppContext.getToken();
         new Thread(() -> {
             try {
-                barcodeService.registrarBulto(token, request);
+                lecturaEmpaqueService.registrarBulto(AppConfig.Operaciones.capturaBultos(),request);
                 Platform.runLater(() -> {
                     lblInfoEmpaque.setText("Registrado: " + request.getPedido());
                     lblInfoEmpaque.setTextFill(Color.web("#28a745"));

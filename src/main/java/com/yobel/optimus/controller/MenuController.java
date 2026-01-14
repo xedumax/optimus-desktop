@@ -31,18 +31,6 @@ public class MenuController {
 
     @FXML
     private void abrirLecturaEmpaques(ActionEvent actionEvent) {
-        // ACCESO DIRECTO SIN VALIDAR           - CASO- PENDIENTE
-        Platform.runLater(() -> {
-            // 1. Cargamos la vista y obtenemos su controlador
-            LecturaController controller = NavigationUtil.cargarDentroDe(contentArea, ViewConfig.LECTURA_EMPAQUE);
-
-            // 2. IMPORTANTE: Pasamos la referencia del contenedor al hijo
-            if (controller != null) {
-                controller.setMainContentArea(contentArea);
-            }
-        });
-
-        // Usamos el constructor Thread(Runnable target) mediante una lambda
         new Thread(() -> {
             try {
                 // Validación de permisos
@@ -52,16 +40,22 @@ public class MenuController {
 
                 if (tienePermiso) {
                     //Éxito: Usamos NavigationUtil para inyectar la vista
-                    Platform.runLater(() ->
-                            NavigationUtil.cargarDentroDe(contentArea, ViewConfig.LECTURA_EMPAQUE)
-                    );
+                    Platform.runLater(() -> {
+                        // 1. Cargamos la vista y obtenemos su controlador
+                        LecturaEmpaqueController controller = NavigationUtil.cargarDentroDe(contentArea, ViewConfig.LECTURA_EMPAQUE);
+
+                        // 2. Pasamos la referencia del contenedor al hijo
+                        if (controller != null) {
+                            controller.setMainContentArea(contentArea);
+                        }
+                    });
                 } else {
-                    // 4. Fallo de permisos: Usamos AlertUtil       CASO- PENDIENTE
-                    //Platform.runLater(() -> AlertUtil.mostrarAdvertencia("Acceso Denegado", "No tiene permisos para el módulo OHS."));
+                    // 3. Fallo de permisos: Usamos AlertUtil
+                    Platform.runLater(() -> AlertUtil.mostrarAdvertencia("Acceso Denegado", "No tiene permisos para el módulo OHS."));
                 }
             } catch (IOException e) {
-                // 5. Error de red: Usamos AlertUtil                CASO- PENDIENTE
-                //Platform.runLater(() -> AlertUtil.mostrarError("Error de Conexión", "No se pudo validar el acceso: " + e.getMessage()) );
+                // 4. Error de red: Usamos AlertUtil
+                    Platform.runLater(() -> AlertUtil.mostrarError("Error de Conexión", "No se pudo validar el acceso: " + e.getMessage()) );
             }
         }).start();
     }

@@ -1,5 +1,6 @@
 package com.yobel.optimus.service;
 
+import com.google.gson.JsonSyntaxException;
 import com.yobel.optimus.model.entity.SystemItem;
 import com.yobel.optimus.model.response.SystemResponse;
 import com.yobel.optimus.util.AppContext;
@@ -73,36 +74,37 @@ public class AuthService {
     //SERVICIO A REVISAR SE SALTEA EL PASO - PENDIENTE
 
     public List<SystemItem> getSystems(String url) throws IOException {
-        java.net.URL urlObj = new java.net.URL(url);
-
-        // OBTENEMOS Y LIMPIAMOS EL TOKEN IGUAL QUE EN EL MÉTODO QUE SÍ FUNCIONA
-        String tokenRaw = AppContext.getToken();
-        String cleanToken = (tokenRaw != null)
-                ? tokenRaw.replaceAll("[^\\x20-\\x7E]", "").replace("\"", "").trim()
-                : "";
-
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("Authorization", "Bearer " + cleanToken) // <--- Usar el token limpio
-                .addHeader("User-Agent", "PostmanRuntime/7.40.0")
+                .addHeader("Authorization", "Bearer " + AppContext.getToken())
                 .addHeader("Accept", "application/json")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            String responseBodyText = (response.body() != null) ? response.body().string() : "";
+            if (response.body() == null) throw new IOException("Respuesta del servidor vacía");
+
+            String responseBodyText = response.body().string();
 
             if (!response.isSuccessful()) {
-                // Imprime el cuerpo para saber por qué falló (ej. Token expirado o mal formado)
-                System.err.println("Error en getSystems: " + response.code() + " Body: " + responseBodyText);
-                throw new IOException("Error del servidor (" + response.code() + ")");
+                // LOG CRÍTICO: Aquí verás si el API dice "Token Expired" o "Invalid URL"
+                System.err.println("DEBUG SYSTEMS - URL: " + url);
+                System.err.println("DEBUG SYSTEMS - CODE: " + response.code());
+                System.err.println("DEBUG SYSTEMS - RESPONSE: " + responseBodyText);
+                throw new IOException("Error " + response.code() + ": " + responseBodyText);
             }
 
+            // 2. Mapeo flexible
             SystemResponse res = gson.fromJson(responseBodyText, SystemResponse.class);
 
-            return (res != null && res.getSystems() != null)
-                    ? res.getSystems()
-                    : java.util.Collections.emptyList();
+            if (res == null || res.getSystems() == null) {
+                System.err.println("ERROR: El JSON no coincide con la clase SystemResponse. JSON: " + responseBodyText);
+                return java.util.Collections.emptyList();
+            }
+
+            return res.getSystems();
+        } catch (JsonSyntaxException e) {
+            throw new IOException("Error al parsear el JSON de sistemas: " + e.getMessage());
         }
     }
 
