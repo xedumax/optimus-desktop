@@ -37,11 +37,12 @@ public class AuthService {
                 .build();
     }
 
-    public String login(String url, String username, String password) throws IOException {
+    public String login(String url, String username, String password, String session) throws IOException {
         // 1. Crear el cuerpo de la petición en formato JSON
         Map<String, String> data = Map.of(
                 "username", username,
-                "password", password
+                "password", password,
+                "session" , session
         );
         String json = gson.toJson(data);
 
@@ -73,28 +74,30 @@ public class AuthService {
 
     public List<SystemItem> getSystems(String url) throws IOException {
         java.net.URL urlObj = new java.net.URL(url);
-        // Construimos la petición mimetizando a Postman
+
+        // OBTENEMOS Y LIMPIAMOS EL TOKEN IGUAL QUE EN EL MÉTODO QUE SÍ FUNCIONA
+        String tokenRaw = AppContext.getToken();
+        String cleanToken = (tokenRaw != null)
+                ? tokenRaw.replaceAll("[^\\x20-\\x7E]", "").replace("\"", "").trim()
+                : "";
+
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("Authorization", "Bearer " + AppContext.getToken())
-                .addHeader("Host", urlObj.getHost()) // <--- Agregamos el Host explícitamente
+                .addHeader("Authorization", "Bearer " + cleanToken) // <--- Usar el token limpio
                 .addHeader("User-Agent", "PostmanRuntime/7.40.0")
-                .addHeader("Accept", "*/*")
-                .addHeader("Cache-Control", "no-cache")
-                .addHeader("Connection", "keep-alive")
+                .addHeader("Accept", "application/json")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            // LEER EL CUERPO UNA SOLA VEZ
             String responseBodyText = (response.body() != null) ? response.body().string() : "";
 
             if (!response.isSuccessful()) {
-                // Si el 403 persiste, el error está en el interceptor (token mal formateado)
+                // Imprime el cuerpo para saber por qué falló (ej. Token expirado o mal formado)
+                System.err.println("Error en getSystems: " + response.code() + " Body: " + responseBodyText);
                 throw new IOException("Error del servidor (" + response.code() + ")");
             }
 
-            // Parsear el JSON guardado en la variable
             SystemResponse res = gson.fromJson(responseBodyText, SystemResponse.class);
 
             return (res != null && res.getSystems() != null)

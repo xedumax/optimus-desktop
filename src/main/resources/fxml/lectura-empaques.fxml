@@ -25,18 +25,13 @@
         <Label text="AGP :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 16;" />
         <ComboBox fx:id="cbAgp" onAction="#onAgpSelected" promptText="Seleccione Agrupador" prefWidth="300" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-        <Label text="Fecha de Proceso :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-size: 16;" />
+        <Label text="Ventana :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-size: 16;" />
         <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
-            <DatePicker fx:id="dpFecha" editable="false" prefWidth="200" promptText="Seleccione fecha" />
-        </HBox>
-
-        <Label text="Ventana :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-size: 16;" />
-        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
             <TextField fx:id="txtVentana" editable="false" focusTraversable="false" prefWidth="200" />
         </HBox>
 
-        <Label text="Pedido :" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-size: 18; -fx-font-weight: bold;" />
-        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="2">
+        <Label text="Pedido :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.columnSpan="2">
             <TextField fx:id="txtPedido" prefWidth="350" prefHeight="40" style="-fx-font-size: 16;" promptText="Escanee código..." />
             <Button fx:id="btnQr" style="-fx-background-color: transparent; -fx-cursor: hand;">
                 <graphic>
@@ -55,8 +50,7 @@
                wrapText="true"
                minHeight="50"
                maxWidth="400"
-               GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="2"
+               GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="2"
                style="-fx-font-size: 14; -fx-font-weight: bold; -fx-font-family: 'Monospaced';" />
-
     </GridPane>
 </VBox>

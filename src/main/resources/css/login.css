@@ -1,0 +1,9 @@
+/* Estado por defecto: Ojo abierto */
+#lblIconoOjo {
+    -fx-text: "👁";
+}
+
+/* Estado cuando la pseudo-clase 'mostrando' está activa: Candado */
+#lblIconoOjo:mostrando {
+    -fx-text: "🔒";
+}

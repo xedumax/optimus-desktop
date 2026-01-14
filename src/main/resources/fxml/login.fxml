@@ -7,7 +7,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
-<VBox alignment="TOP_CENTER" spacing="10.0" style="-fx-background-color: white;"
+<VBox fx:id="rootContainer" focusTraversable="true" stylesheets="@../css/login.css" alignment="TOP_CENTER" spacing="10.0" style="-fx-background-color: white;"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.yobel.optimus.controller.LoginController">
 
@@ -22,7 +22,7 @@
         <Label text="Optimus" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-font-family: 'Segoe UI';" />
         <Label text="HERRAMIENTAS DE SOPORTE" style="-fx-font-size: 14; -fx-text-fill: #555;" />
 
-        <VBox alignment="CENTER_LEFT" maxWidth="350" spacing="15">
+        <VBox alignment="CENTER_LEFT" maxWidth="350" spacing="15" >
             <padding><Insets top="20" /></padding>
             <Label text="Inicie sesión con sus credenciales."  />
 
@@ -35,7 +35,7 @@
                                style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 0 40 0 10;" />
 
                     <PasswordField fx:id="txtClave" prefHeight="45" promptText="Clave *"
-                                   style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 0 40 0 10;" />
+                                style="-fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-padding: 0 40 0 10;" />
 
                     <ToggleButton fx:id="btnVerClave" onAction="#togglePassword"
                                   style="-fx-background-color: transparent; -fx-cursor: hand;">
@@ -49,7 +49,7 @@
                 </children>
             </StackPane>
 
-            <ComboBox fx:id="cbAmbiente" prefHeight="45" prefWidth="350" promptText="Entorno"
+            <ComboBox fx:id="cbAmbiente"  prefHeight="45" prefWidth="350" promptText="Seleccione entorno"
                       style="-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #ccc; -fx-border-radius: 5;
                              -fx-font-family: 'Segoe UI'; -fx-font-size: 14;" />
 

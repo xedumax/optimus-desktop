@@ -3,19 +3,22 @@ package com.yobel.optimus.controller;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yobel.optimus.service.AuthService;
-import com.yobel.optimus.util.AppContext;
+import com.yobel.optimus.util.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class LoginController {
+    @FXML private Pane rootContainer; // O VBox, según tu raíz
     @FXML private TextField txtUsuario;
     @FXML private PasswordField txtClave;
     @FXML private TextField txtClaveVisible;
@@ -24,106 +27,98 @@ public class LoginController {
     @FXML private Button btnIniciar;
     @FXML private ComboBox<String> cbAmbiente;
 
+    // Definimos la pseudo-clase como una constante al inicio de la clase
+    private static final PseudoClass MOSTRANDO_CLAVE = PseudoClass.getPseudoClass("mostrando");
+
     private final AuthService authService = new AuthService();
 
     @FXML
     public void initialize() {
-        // Configurar opciones del combo
+        // Quitamos el foco del campo de usuario al iniciar
+        Platform.runLater(() -> rootContainer.requestFocus());
+
+        //Inicializando valores para pruebas - PENDIENTE
+        txtUsuario.setText("pejefeprod");
+        txtClave.setText("yobelscm2025");
+
+        // Configurar opciones del combo de entornos
         cbAmbiente.setItems(FXCollections.observableArrayList("DEV", "QAS", "PROD"));
-        cbAmbiente.setValue("DEV"); // Por defecto
         // Vincula los textos de ambos campos para que siempre sean iguales
         txtClaveVisible.textProperty().bindBidirectional(txtClave.textProperty());
     }
 
     @FXML
     private void togglePassword() {
-        if (btnVerClave.isSelected()) {
-            txtClaveVisible.setVisible(true);
-            txtClave.setVisible(false);
-            lblIconoOjo.setText("🔒"); // O cambia por el icono de ojo tachado
-        } else {
-            txtClaveVisible.setVisible(false);
-            txtClave.setVisible(true);
-            lblIconoOjo.setText("👁");
-        }
+        boolean ver = btnVerClave.isSelected();
+
+        txtClaveVisible.setVisible(ver);
+        txtClave.setVisible(!ver);
+
+        // 2. Lógica visual: Solo le decimos al Label si el estado "mostrando" es verdadero o falso
+        lblIconoOjo.pseudoClassStateChanged(MOSTRANDO_CLAVE, ver);
     }
 
     @FXML
     protected void onLoginClick() {
-        String user = txtUsuario.getText();
-        String pass = txtClave.getText();
-        String ambiente = cbAmbiente.getValue();
+        String user = txtUsuario.getText().trim();
+        String pass = txtClave.getText().trim();
+        String session = AppContext.getSession();
+        String ambienteSeleccionado = cbAmbiente.getValue();
 
+        // 1. Validar campos básicos antes de intentar el login
+        if (user.isEmpty() || pass.isEmpty()) {
+            AlertUtil.mostrarAdvertencia("Campos Requeridos", "Por favor, ingrese usuario y contraseña.");
+            return;
+        }
 
-        String baseUrl = switch (ambiente) {
-            case "QAS" -> "https://optimus-qas.yobel.biz";
-            case "PROD" -> "https://optimus.yobel.biz";
-            default -> "https://optimus-dev.yobel.biz";
-        };
+        // 2. Establecer el ambiente ANTES de obtener la URL del endpoint
+        AppContext.setAmbiente(ambienteSeleccionado);
 
-        String loginUrl = baseUrl + "/api/msi/autorizacion/auth/login";
+        // Ahora AppConfig.Auth.login() sabrá exactamente a qué servidor apuntar
+        String loginUrl = AppConfig.Auth.login();
 
         new Thread(() -> {
             try {
-                // 1. Ejecutar Login
-                String resultado = authService.login(loginUrl, user, pass);
-                String token = null;
+                // 3. Ejecutar Login a través del servicio
+                String resultado = authService.login(loginUrl, user, pass, session);
 
-                // 2. Extraer Token
+                // 4. Parsear y Limpiar Token
                 JsonObject jsonObject = JsonParser.parseString(resultado).getAsJsonObject();
-                if (jsonObject.has("token")) {
-                    token = jsonObject.get("token").getAsString();
-                    AppContext.setToken(token);
-                }
 
-                if (token != null) {
-                    // 3. Guardar token en el contexto global (AppContext)
-                    AppContext.setToken(token);
-                    AppContext.setBaseUrl(baseUrl);
+                if (jsonObject.has("token") && !jsonObject.get("token").isJsonNull()) {
+                    String tokenRaw = jsonObject.get("token").getAsString();
 
-                    // 4. Ir al menú principal de inmediato
+                    // Limpieza de seguridad: remueve comillas y caracteres ocultos
+                    String cleanToken = tokenRaw.replaceAll("[^\\x20-\\x7E]", "").replace("\"", "").trim();
+
+                    // 5. Guardar sesión en el contexto global
+                    AppContext.setToken(cleanToken);
+                    AppContext.setUsuario(user);
+
+                    System.out.println("Login exitoso en entorno: " + AppConfig.obtenerInfoAmbiente());
+
+                    // 6. Navegar al menú principal
                     Platform.runLater(this::irAlMenu);
+                } else {
+                    Platform.runLater(() -> AlertUtil.mostrarError("Error de Autenticación", "Respuesta del servidor inválida."));
                 }
 
             } catch (IOException e) {
-                // Maneja errores 401 (Credenciales mal) o problemas de red
-                Platform.runLater(() -> mostrarAlerta("Acceso Fallido", e.getMessage()));
+                // Maneja errores de red o credenciales incorrectas (401/403)
+                Platform.runLater(() -> {
+                    String errorMsg = e.getMessage().contains("401")
+                            ? "Usuario o clave incorrectos."
+                            : "Error de conexión: " + e.getMessage();
+                    AlertUtil.mostrarError("Acceso Fallido", errorMsg);
+                });
             }
         }).start();
     }
 
     private void irAlMenu() {
-        try {
-            // 1. Cargar el FXML del menú
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/menu.fxml"));
-            Parent root = loader.load();
-
-            // 2. Obtener el Stage actual usando el botón de login
-            Stage stage = (Stage) btnIniciar.getScene().getWindow();
-
-            // 3. Configurar scene
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("Optimus - Herramientas");
-            stage.setResizable(true);
-            stage.centerOnScreen();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo cargar el menú principal.");
-        }
-    }
-
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
-
-    private String getPassword() {
-        return txtClave.getText();
+        // Ya no necesitas try-catch aquí porque NavigationUtil se encarga
+        Platform.runLater(() ->
+                NavigationUtil.cambiarVentana(btnIniciar, ViewConfig.MENU, "Optimus - Menú")
+        );
     }
 }

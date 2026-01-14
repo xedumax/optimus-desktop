@@ -2,13 +2,11 @@ package com.yobel.optimus.controller;
 
 import com.yobel.optimus.model.entity.SystemItem;
 import com.yobel.optimus.service.AuthService;
-import com.yobel.optimus.util.AppContext;
+import com.yobel.optimus.util.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
 import java.io.IOException;
@@ -16,73 +14,56 @@ import java.util.List;
 
 public class MenuController {
 
-    @FXML
-    private AnchorPane contentArea;
+    @FXML private AnchorPane contentArea;
+    @FXML private Label lblUsuarioSesion;
+    @FXML private Label lblEntornoSesion;
 
     private final AuthService authService = new AuthService();
 
     @FXML
     public void initialize() {
-        System.out.println("Menú inicializado. Ambiente: " + AppContext.getBaseUrl());
+        String usuario = AppContext.getUsuario();
+        String entorno = AppContext.getAmbiente();
+
+        lblUsuarioSesion.setText(usuario != null ? usuario.toUpperCase() : AppConstants.USUARIO_SESION);
+        lblEntornoSesion.setText(entorno != null ? entorno : AppConstants.USUARIO_ENTORNO_DEV);
     }
 
     @FXML
     private void abrirLecturaEmpaques(ActionEvent actionEvent) {
-        Platform.runLater(this::cargarVistaLectura);    ////-----------SE ACCEDE SIN VALIDAR PERMISOS - SYSTEMNAME = “OHS” - PENDIENTE
+        // ACCESO DIRECTO SIN VALIDAR           - CASO- PENDIENTE
+        Platform.runLater(() -> {
+            // 1. Cargamos la vista y obtenemos su controlador
+            LecturaController controller = NavigationUtil.cargarDentroDe(contentArea, ViewConfig.LECTURA_EMPAQUE);
 
-        String systemUrl = AppContext.getBaseUrl() + "/api/msi/autorizacion/system";
+            // 2. IMPORTANTE: Pasamos la referencia del contenedor al hijo
+            if (controller != null) {
+                controller.setMainContentArea(contentArea);
+            }
+        });
 
-        // 1. Validar permisos en un hilo separado
+        // Usamos el constructor Thread(Runnable target) mediante una lambda
         new Thread(() -> {
             try {
-                List<SystemItem> listaSistemas = authService.getSystems(systemUrl);
-
-                // Verificar si el usuario tiene permiso para el sistema (ejemplo: "OHS")
+                // Validación de permisos
+                List<SystemItem> listaSistemas = authService.getSystems(AppConfig.Auth.sistemas());
                 boolean tienePermiso = listaSistemas.stream()
-                        .anyMatch(s -> "OHS".equalsIgnoreCase(s.getSystemName()));
+                        .anyMatch(s -> AppConstants.SYSTEM_NAME_OHS.equalsIgnoreCase(s.getSystemName()));
 
                 if (tienePermiso) {
-                    Platform.runLater(this::cargarVistaLectura);
+                    //Éxito: Usamos NavigationUtil para inyectar la vista
+                    Platform.runLater(() ->
+                            NavigationUtil.cargarDentroDe(contentArea, ViewConfig.LECTURA_EMPAQUE)
+                    );
                 } else {
-                    Platform.runLater(() -> mostrarAlerta("Acceso Denegado", "No tienes permisos para 'Lectura Empaques'."));
+                    // 4. Fallo de permisos: Usamos AlertUtil       CASO- PENDIENTE
+                    //Platform.runLater(() -> AlertUtil.mostrarAdvertencia("Acceso Denegado", "No tiene permisos para el módulo OHS."));
                 }
             } catch (IOException e) {
-                //Platform.runLater(() -> mostrarAlerta("Error", "No se pudieron validar los permisos: " + e.getMessage()));
+                // 5. Error de red: Usamos AlertUtil                CASO- PENDIENTE
+                //Platform.runLater(() -> AlertUtil.mostrarError("Error de Conexión", "No se pudo validar el acceso: " + e.getMessage()) );
             }
         }).start();
     }
 
-    private void cargarVistaLectura() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/lectura-empaques.fxml"));
-            Node view = loader.load();
-
-            // Configurar controlador de la nueva vista
-            LecturaController controller = loader.getController();
-            controller.setMainContentArea(contentArea);
-
-            // Inyectar en el área central
-            contentArea.getChildren().setAll(view);
-
-            // Ajustar al tamaño del contenedor
-            AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setBottomAnchor(view, 0.0);
-            AnchorPane.setLeftAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "Error al cargar la vista de empaques.");
-        }
-    }
-
-
-
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
 }

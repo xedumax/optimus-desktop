@@ -26,4 +26,15 @@
             </children>
         </AnchorPane>
     </children>
+    <HBox spacing="20" style="-fx-background-color: #f4f4f4; -fx-padding: 5 15; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;">
+        <Label text="Usuario: " style="-fx-font-weight: bold;" />
+        <Label fx:id="lblUsuarioSesion" text="..." />
+
+        <Separator orientation="VERTICAL" />
+
+        <Label text="Entorno: " style="-fx-font-weight: bold;" />
+        <Label fx:id="lblEntornoSesion" text="..." />
+
+        <Region HBox.hgrow="ALWAYS" /> <Label fx:id="lblVersion" text="v1.0.0" style="-fx-text-fill: #888888;" />
+    </HBox>
 </VBox>
