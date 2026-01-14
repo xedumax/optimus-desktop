@@ -36,3 +36,9 @@ out/
 # ======================
 # OS
 # ====
+
+
+# SonarLint / SonarQube
+.sonarlint/
+.sonar/
+.sonarqube/
