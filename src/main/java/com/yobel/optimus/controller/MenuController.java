@@ -25,7 +25,7 @@ public class MenuController {
         String usuario = AppContext.getUsuario();
         String entorno = AppContext.getAmbiente();
 
-        lblUsuarioSesion.setText(usuario != null ? usuario.toUpperCase() : AppConstants.USUARIO_SESION);
+        lblUsuarioSesion.setText(usuario != null ? usuario.toUpperCase() : AppConstants.USUARIO_DESCONOCIDO);
         lblEntornoSesion.setText(entorno != null ? entorno : AppConstants.USUARIO_ENTORNO_DEV);
     }
 
@@ -60,4 +60,46 @@ public class MenuController {
         }).start();
     }
 
+    @FXML
+    private void abrirImprimirEtiquetas(ActionEvent actionEvent) {
+        new Thread(() -> {
+            try {
+                // Validación de permisos
+                List<SystemItem> listaSistemas = authService.getSystems(AppConfig.Auth.sistemas());
+                boolean tienePermiso = listaSistemas.stream()
+                        .anyMatch(s -> AppConstants.SYSTEM_NAME_OHS.equalsIgnoreCase(s.getSystemName()));
+
+                if (tienePermiso) {
+                    //Éxito: Usamos NavigationUtil para inyectar la vista
+                    Platform.runLater(() -> {
+                        // 1. Cargamos la vista y obtenemos su controlador
+                        ImpresionEtiquetaController controller = NavigationUtil.cargarDentroDe(contentArea, ViewConfig.IMPRESION_ETIQUETAS);
+
+                        // 2. Pasamos la referencia del contenedor al hijo
+                        if (controller != null) {
+                            controller.setMainContentArea(contentArea);
+                        }
+                    });
+                } else {
+                    // 3. Fallo de permisos: Usamos AlertUtil
+                    Platform.runLater(() -> AlertUtil.mostrarAdvertencia("Acceso Denegado", "No tiene permisos para el módulo OHS."));
+                }
+            } catch (IOException e) {
+                // 4. Error de red: Usamos AlertUtil
+                Platform.runLater(() -> AlertUtil.mostrarError("Error de Conexión", "No se pudo validar el acceso: " + e.getMessage()) );
+            }
+        }).start();
+    }
+
+    @FXML
+    private void handleExit(javafx.scene.input.MouseEvent event) {
+        // 1. Confirmación al usuario
+        boolean confirmar = AlertUtil.mostrarConfirmacion("Salir", "¿Está seguro que desea cerrar la aplicación?");
+
+        if (confirmar) {
+            // 2. Cerrar la aplicación de forma limpia
+            javafx.application.Platform.exit();
+            System.exit(0);
+        }
+    }
 }

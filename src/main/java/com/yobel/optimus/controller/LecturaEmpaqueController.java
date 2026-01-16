@@ -5,6 +5,7 @@ import com.yobel.optimus.model.entity.Cuenta;
 import com.yobel.optimus.model.entity.Ventana;
 import com.yobel.optimus.model.request.LecturaRequest;
 import com.yobel.optimus.service.LecturaEmpaqueService;
+import com.yobel.optimus.service.MaestroService;
 import com.yobel.optimus.util.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,6 +30,7 @@ public class LecturaEmpaqueController {
 
     private AnchorPane mainContentArea;
     private LecturaEmpaqueService lecturaEmpaqueService = new LecturaEmpaqueService(new OkHttpClient());
+    private MaestroService maestrodeService = new MaestroService(new OkHttpClient());
 
     @FXML
     public void initialize() {
@@ -45,10 +47,9 @@ public class LecturaEmpaqueController {
     }
 
     private void cargarCuentas() {
-        String token = AppContext.getToken();
         new Thread(() -> {
             try {
-                List<Cuenta> listaFiltrada = lecturaEmpaqueService.getCuentas(AppConfig.Maestros.cuentas());
+                List<Cuenta> listaFiltrada = maestrodeService.getCuentas(AppConfig.Maestros.cuentas());
                 Platform.runLater(() -> {
                     if (listaFiltrada != null && !listaFiltrada.isEmpty()) {
                         cbCuenta.getItems().setAll(listaFiltrada);
@@ -63,12 +64,10 @@ public class LecturaEmpaqueController {
     }
 
     private void cargarAgrupadores() {
-        String token = AppContext.getToken();
-
         new Thread(() -> {
             try {
                 // 1. Obtenemos la lista desde el servicio
-                List<Agrupador> lista = lecturaEmpaqueService.getAgrupadores(AppConfig.Maestros.agrupadores());
+                List<Agrupador> lista = maestrodeService.getAgrupadores(AppConfig.Maestros.agrupadores());
 
                 // 2. Actualizamos la UI en el hilo principal
                 Platform.runLater(() -> {
@@ -86,39 +85,10 @@ public class LecturaEmpaqueController {
         }).start();
     }
 
-    @FXML
-    private void onCuentaSelected(ActionEvent event) {
-        Cuenta seleccionada = cbCuenta.getSelectionModel().getSelectedItem();
-
-        if (seleccionada != null) {
-            System.out.println("Cuenta seleccionada: " + seleccionada.getCtaCodigo());
-
-            // Lógica opcional: Si la cuenta tiene un AGP por defecto, seleccionarlo en cbAgp
-            if (seleccionada.getCtaAgpDflt() != null) {
-                String agpDefecto = seleccionada.getCtaAgpDflt();
-                cbAgp.getItems().stream()
-                        .filter(a -> a.getAgp().equals(agpDefecto))
-                        .findFirst()
-                        .ifPresent(a -> cbAgp.getSelectionModel().select(a));
-            }
-        }
-    }
-
-    @FXML
-    private void onAgpSelected(ActionEvent event) {
-        Agrupador agpSeleccionado = cbAgp.getSelectionModel().getSelectedItem();
-        Cuenta cuentaSeleccionada = cbCuenta.getSelectionModel().getSelectedItem();
-
-        if (agpSeleccionado != null && cuentaSeleccionada != null) {
-            cargarVentanas(cuentaSeleccionada.getCtaCodigo(), agpSeleccionado.getAgp());
-        }
-    }
-
     private void cargarVentanas(String codCuenta, String filtroAgp) {
-        String token = AppContext.getToken();
         new Thread(() -> {
             try {
-                List<Ventana> todas = lecturaEmpaqueService.getVentanas(AppConfig.Maestros.ventanas()+codCuenta);
+                List<Ventana> todas = maestrodeService.getVentanas(AppConfig.Maestros.ventanas()+codCuenta);
                 Optional<Ventana> ventanaMatch = todas.stream()
                         .filter(v -> filtroAgp.equals(v.getAgpCuenta()) && "A".equals(v.getEstado()))
                         .findFirst();
@@ -199,7 +169,6 @@ public class LecturaEmpaqueController {
     }
 
     private void enviarAlApi(LecturaRequest request) {
-        String token = AppContext.getToken();
         new Thread(() -> {
             try {
                 lecturaEmpaqueService.registrarBulto(AppConfig.Operaciones.capturaBultos(),request);
@@ -215,6 +184,34 @@ public class LecturaEmpaqueController {
                 });
             }
         }).start();
+    }
+
+    @FXML
+    private void onCuentaSelected(ActionEvent event) {
+        Cuenta seleccionada = cbCuenta.getSelectionModel().getSelectedItem();
+
+        if (seleccionada != null) {
+            System.out.println("Cuenta seleccionada: " + seleccionada.getCtaCodigo());
+
+            // Lógica opcional: Si la cuenta tiene un AGP por defecto, seleccionarlo en cbAgp
+            if (seleccionada.getCtaAgpDflt() != null) {
+                String agpDefecto = seleccionada.getCtaAgpDflt();
+                cbAgp.getItems().stream()
+                        .filter(a -> a.getAgp().equals(agpDefecto))
+                        .findFirst()
+                        .ifPresent(a -> cbAgp.getSelectionModel().select(a));
+            }
+        }
+    }
+
+    @FXML
+    private void onAgpSelected(ActionEvent event) {
+        Agrupador agpSeleccionado = cbAgp.getSelectionModel().getSelectedItem();
+        Cuenta cuentaSeleccionada = cbCuenta.getSelectionModel().getSelectedItem();
+
+        if (agpSeleccionado != null && cuentaSeleccionada != null) {
+            cargarVentanas(cuentaSeleccionada.getCtaCodigo(), agpSeleccionado.getAgp());
+        }
     }
 
     @FXML

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yobel.optimus.controller.ImpresionEtiquetaController">
+    <padding><Insets top="30" left="40" right="40" /></padding>
+
+    <HBox alignment="TOP_RIGHT">
+        <Button text="VOLVER" onAction="#volverAlMenu"
+                style="-fx-background-color: #455a64; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 5 20; -fx-cursor: hand;" />
+    </HBox>
+
+    <Text text="IMPRESIÓN DE ETIQUETAS" style="-fx-font-size: 26; -fx-font-weight: bold;" />
+
+    <VBox alignment="CENTER" spacing="15" maxWidth="600">
+
+        <GridPane vgap="15" hgap="10" alignment="CENTER">
+            <Label text="Cuenta :" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-size: 16;" />
+            <ComboBox fx:id="cbCuenta" onAction="#onCuentaSelected" promptText="Seleccione Cuenta" prefWidth="350" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label text="Etiqueta :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 16;" />
+            <ComboBox fx:id="cbEtiqueta" onAction="#onAgpSelected" promptText="Seleccione Modelo" prefWidth="350" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        </GridPane>
+
+        <VBox fx:id="vbOpcional" spacing="15" visible="false" managed="false"
+              style="-fx-border-color: #bababa; -fx-border-radius: 5; -fx-padding: 15; -fx-border-width: 1;">
+
+            <Label text="Opcional" style="-fx-font-weight: bold; -fx-translate-y: -25; -fx-background-color: white; -fx-padding: 0 5;" />
+
+            <GridPane vgap="12" hgap="10" alignment="CENTER" style="-fx-translate-y: -10;">
+                <Label text="AGP :" style="-fx-font-weight: bold; -fx-text-fill: #b26b00;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cbAgp" promptText="Seleccione Agrupador" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="LPR :" style="-fx-font-weight: bold; -fx-text-fill: #b26b00;" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cbLpr" prefWidth="180" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                <Label text="Zona Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="txtZonaCliente" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="Sub-Cta.Cliente:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <TextField fx:id="txtSubCtaCliente" prefWidth="150" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            </GridPane>
+        </VBox>
+
+        <Button fx:id="btnProcesar" text="Procesar" onAction="#handleProcesar"
+                prefHeight="45" prefWidth="180"
+                style="-fx-background-color: black; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-cursor: hand;">
+            <VBox.margin><Insets top="10"/></VBox.margin>
+        </Button>
+    </VBox>
+</VBox>

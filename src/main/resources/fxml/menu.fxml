@@ -15,8 +15,14 @@
                 </Menu>
                 <Menu text="_Etiquetas Generales">
                     <items>
-                        <MenuItem text="Imprimir Etiquetas" />
+                        <MenuItem text="Imprimir Etiquetas" onAction="#abrirImprimirEtiquetas"/>
                     </items>
+                </Menu>
+                <Menu>
+                    <graphic>
+                        <Label text="Salir" onMouseClicked="#handleExit"
+                               style="-fx-cursor: hand; -fx-padding: 0 5; -fx-text-fill: black;" />
+                    </graphic>
                 </Menu>
             </menus>
         </MenuBar>

@@ -67,6 +67,11 @@ public class LoginController {
             return;
         }
 
+        if (ambienteSeleccionado == null || ambienteSeleccionado.isEmpty()) {
+            AlertUtil.mostrarAdvertencia("Entorno Requerido", "Debe seleccionar un entorno (DEV, QAS o PROD) para continuar.");
+            return;
+        }
+
         // 2. Establecer el ambiente ANTES de obtener la URL del endpoint
         AppContext.setAmbiente(ambienteSeleccionado);
 
@@ -91,7 +96,7 @@ public class LoginController {
                     AppContext.setToken(cleanToken);
                     AppContext.setUsuario(user);
 
-                    System.out.println("Login exitoso en entorno: " + AppConfig.obtenerInfoAmbiente());
+                    System.out.println("Login exitoso en entorno: " + AppContext.getAmbiente());
 
                     // 6. Navegar al menú principal
                     Platform.runLater(this::irAlMenu);

@@ -11,7 +11,7 @@ public class AppConstants {
     public static final String ESTADO_ACTIVO = "A";
     public static final String ESTADO_INACTIVO = "I";
     public static final String SYSTEM_NAME_OHS = "OHS";
-    public static final String USUARIO_SESION = "Desconocido";
+    public static final String USUARIO_DESCONOCIDO = "Desconocido";
     public static final String USUARIO_ENTORNO_DEV = "DEV";
     public static final String AGRUPADOR_SIN_VENTANA = "SIN VENTANA ACTIVA";
 

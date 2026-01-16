@@ -27,51 +27,6 @@ public class LecturaEmpaqueService {
     }
 
     /**
-     * Obtiene la lista de agrupadores usando la URL proporcionada
-     */
-    public List<Agrupador> getAgrupadores(String url) throws IOException {
-        Request request = buildGetRequest(url);
-
-        try (Response response = client.newCall(request).execute()) {
-            String body = getResponseBody(response);
-            AgrupadorResponse res = gson.fromJson(body, AgrupadorResponse.class);
-            return (res != null && res.getData() != null) ? res.getData() : Collections.emptyList();
-        }
-    }
-
-    /**
-     * Obtiene cuentas filtrando por tipo '1'
-     */
-    public List<Cuenta> getCuentas(String url) throws IOException {
-        Request request = buildGetRequest(url);
-
-        try (Response response = client.newCall(request).execute()) {
-            String body = getResponseBody(response);
-            CuentaResponse res = gson.fromJson(body, CuentaResponse.class);
-
-            if (res != null && res.getData() != null) {
-                return res.getData().stream()
-                        .filter(c -> "1".equals(c.getCtaTipo()))
-                        .collect(Collectors.toList());
-            }
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Obtiene ventanas para una cuenta específica
-     */
-    public List<Ventana> getVentanas(String url) throws IOException {
-        Request request = buildGetRequest(url);
-
-        try (Response response = client.newCall(request).execute()) {
-            String body = getResponseBody(response);
-            VentanaResponse res = gson.fromJson(body, VentanaResponse.class);
-            return (res != null && res.getData() != null) ? res.getData() : Collections.emptyList();
-        }
-    }
-
-    /**
      * Registra el bulto/pedido en el API
      */
     public void registrarBulto(String url, LecturaRequest lecturaRequest) throws IOException {

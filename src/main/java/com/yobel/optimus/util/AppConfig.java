@@ -38,6 +38,9 @@ public class AppConfig {
         public static String ventanas() {
             return getBaseUrl() + "/api/dyt/gestion-maestros/ventanaDsp/list/";
         }
+        public static String lineasProduccion(String cuenta, String agp) {
+            return getBaseUrl() + "/api/prd/matriz/lineaProduccion/listSel/" + cuenta + "/" + agp;
+        }
     }
 
     public static class Operaciones {
@@ -46,11 +49,4 @@ public class AppConfig {
         }
     }
 
-    /**
-     * Retorna el nombre del ambiente actual para mostrarlo en la UI.
-     */
-    public static String obtenerInfoAmbiente() {
-        String env = AppContext.getAmbiente();
-        return (env != null) ? env : "DEV";
-    }
 }
