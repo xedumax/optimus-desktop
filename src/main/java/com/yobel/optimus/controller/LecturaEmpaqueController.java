@@ -37,11 +37,6 @@ public class LecturaEmpaqueController {
         cargarCuentas();
         cargarAgrupadores();
 
-        txtPedido.setOnKeyPressed(event -> {
-            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) ejecutarProcesamiento();
-        });
-        btnQr.setOnAction(event -> ejecutarProcesamiento());
-
         // Foco inicial sutil
         Platform.runLater(() -> cbCuenta.requestFocus());
     }
@@ -109,11 +104,15 @@ public class LecturaEmpaqueController {
         }).start();
     }
 
+    @FXML
     private void ejecutarProcesamiento() {
-        txtPedido.setText("PE0125067454001"); //PENDIENTE
+        if (!validarCampos()) return;
+
+        //Lectura por codigo de barras e implementación - Se ingresará manualmente mientras tanto
         String codigo = txtPedido.getText().trim();
 
         if (codigo.isEmpty()) {
+            lblInfoEmpaque.setVisible(true);
             lblInfoEmpaque.setText("Error: Escanee una etiqueta.");
             lblInfoEmpaque.setTextFill(Color.RED);
             txtPedido.setStyle("-fx-border-color: red;");
@@ -128,62 +127,87 @@ public class LecturaEmpaqueController {
     private void procesarLectura(String codigoBarras) {
         try {
             int longitud = codigoBarras.length();
-            if (longitud < 6) throw new Exception("Código no válido");
+            if (longitud < 15) throw new Exception("Código no válido (muy corto)");
 
-            // 1. Descomposición de la información
-            String ctr = codigoBarras.substring(0, 2); // CTR: primeros 2 caracteres
-            String correlativo = codigoBarras.substring(longitud - 3); // Correlativo: últimos 3
-            // Pedido: desde pos 3 hasta longitud - 3
+            lblInfoEmpaque.setText("Error: Escanee una etiqueta.");
+
+            // 1. Descomposición (Lógica de negocio estable)
+            String ctr = codigoBarras.substring(0, 2);
+            String correlativo = codigoBarras.substring(longitud - 3);
             String numPedido = codigoBarras.substring(2, longitud - 3);
 
-            // 2. Obtención de fecha y hora local
-            LocalDateTime localDateTime = LocalDateTime.now();
-            String fechaFormateada = localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            String fechaFormateada = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-            // 3. Actualizar UI (Texto verde con ajuste de línea)
-            Platform.runLater(() -> {
-                lblInfoEmpaque.setText(String.format(
-                        "Último Empaque Leído:\nCTR: %s | Pedido: %s | Corr: %s\nHora Local: %s",
-                        ctr, numPedido, correlativo, fechaFormateada
-                ));
-                lblInfoEmpaque.setTextFill(Color.web("#28a745"));
-            });
+            // 2. Actualizar UI directamente (Estamos en el UI Thread aquí)
+            lblInfoEmpaque.setVisible(false);
+            lblInfoEmpaque.setTextFill(Color.GREEN);
+            lblInfoEmpaque.setText(String.format
+                                    ("Último Empaque Leído:\nCTR: %s | Pedido: %s | Corr: %s",
+                                     ctr, numPedido, correlativo));
 
-            // 4. Preparar Request para el API
+            // 3. Captura de datos para el Request
+            String codCta = cbCuenta.getValue().getCtaCodigo();
+            String codAgp = cbAgp.getValue().getAgp();
+            String usuario = AppContext.getUsuario();
+
             LecturaRequest request = new LecturaRequest(
-                    cbCuenta.getSelectionModel().getSelectedItem().getCtaCodigo(), // cuenta
-                    cbAgp.getSelectionModel().getSelectedItem().getAgp(),          // codAgp
-                    codigoBarras,                                                  // pedido (código leído)
-                    fechaFormateada,                                               // fecModif
-                    AppContext.getUsuario(), // userModif (Usuario del login)
-                    fechaFormateada,                                               // fechaAutomatico
-                    AppConstants.ORIGEN_AUTOMATICO                                 // origen
+                    codCta, codAgp, codigoBarras, fechaFormateada,
+                    usuario, fechaFormateada, AppConstants.ORIGEN_AUTOMATICO
             );
 
+            // 4. Enviar al hilo secundario
             enviarAlApi(request);
 
         } catch (Exception e) {
-            System.err.println("Error al invocar procesarLectura: " + e.getMessage());
-            lblInfoEmpaque.setTextFill(Color.RED);
+            // 3. CAPTURA DE EXCEPCIÓN: Aquí manejamos el "Código no válido"
+            lblInfoEmpaque.setVisible(true);   // Aseguramos que se vea
+            lblInfoEmpaque.setManaged(true);   // Aseguramos que ocupe espacio
+            lblInfoEmpaque.setTextFill(Color.RED); // Color de error
+
+            // Mostramos exactamente el mensaje que pusimos en el throw
+            lblInfoEmpaque.setText("Error: " + e.getMessage());
+
+            // Opcional: Marcar el cuadro de texto en rojo para llamar la atención
+            txtPedido.setStyle("-fx-border-color: red;");
         }
     }
 
     private void enviarAlApi(LecturaRequest request) {
         new Thread(() -> {
             try {
-                lecturaEmpaqueService.registrarBulto(AppConfig.Operaciones.capturaBultos(),request);
+                // Llamada al servicio usando AppConfig directamente como instruiste
+                lecturaEmpaqueService.registrarBulto(AppConfig.Operaciones.capturaBultos(), request);
+                lblInfoEmpaque.setVisible(true);
+
                 Platform.runLater(() -> {
-                    lblInfoEmpaque.setText("Registrado: " + request.getPedido());
-                    lblInfoEmpaque.setTextFill(Color.web("#28a745"));
+                    lblInfoEmpaque.setTextFill(Color.GREEN);
+                    limpiarCampos();
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     lblInfoEmpaque.setText("Error al registrar en servidor");
                     lblInfoEmpaque.setTextFill(Color.RED);
-                    AlertUtil.mostrarError("Error de Registro", "No se pudo sincronizar el bulto. Se recomienda registro manual.");
+                    AlertUtil.mostrarError("Error de Registro", "No se pudo sincronizar el bulto.");
                 });
             }
         }).start();
+    }
+
+    private boolean validarCampos() {
+        if (cbCuenta.getValue() == null) {
+            AlertUtil.mostrarAdvertencia("Falta Información", "Seleccione una Cuenta.");
+            return false;
+        }
+        if (cbAgp.getValue() == null) {
+            AlertUtil.mostrarAdvertencia("Falta Información", "Seleccione un Modelo de Etiqueta.");
+            return false;
+        }
+
+        lblInfoEmpaque.setVisible(true);
+        lblInfoEmpaque.setManaged(true);
+        lblInfoEmpaque.setTextFill(Color.GRAY);
+        lblInfoEmpaque.setText("Esperando lectura... ");
+        return true;
     }
 
     @FXML
@@ -231,10 +255,11 @@ public class LecturaEmpaqueController {
     }
 
     private void limpiarCampos() {
-        txtPedido.clear();
+        // Limpiar Selecciones
+        cbCuenta.getSelectionModel().clearSelection();
+        cbAgp.getSelectionModel().clearSelection();
         txtVentana.clear();
-        lblInfoEmpaque.setText("Esperando lectura...");
-        lblInfoEmpaque.setTextFill(Color.GRAY);
+        txtPedido.clear();
     }
 
     public void setMainContentArea(AnchorPane contentArea) {
