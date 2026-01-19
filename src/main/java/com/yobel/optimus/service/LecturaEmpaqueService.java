@@ -1,20 +1,11 @@
 package com.yobel.optimus.service;
 
 import com.google.gson.Gson;
-import com.yobel.optimus.model.entity.Agrupador;
-import com.yobel.optimus.model.entity.Cuenta;
-import com.yobel.optimus.model.entity.Ventana;
 import com.yobel.optimus.model.request.LecturaRequest;
-import com.yobel.optimus.model.response.AgrupadorResponse;
-import com.yobel.optimus.model.response.CuentaResponse;
-import com.yobel.optimus.model.response.VentanaResponse;
 import com.yobel.optimus.util.AppContext;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class LecturaEmpaqueService {
 

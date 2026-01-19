@@ -26,7 +26,7 @@ public class LecturaEmpaqueController {
     @FXML private ComboBox<Agrupador> cbAgp;
     @FXML private TextField txtVentana, txtPedido;
     @FXML private Label lblInfoEmpaque;
-    @FXML private Button btnQr;
+    @FXML private Button btnBarcode;
 
     private AnchorPane mainContentArea;
     private LecturaEmpaqueService lecturaEmpaqueService = new LecturaEmpaqueService(new OkHttpClient());

@@ -7,12 +7,6 @@ n
 >src/main/java/com/yobel/optimus/controller/MenuController.java,8\8\8838fa36f8e8919ab22149de140e65d157dfc873
 h
 8src/main/java/com/yobel/optimus/service/AuthService.java,e\5\e55b9fbca7ae872944d26cf1eed53c5967a27fba
-i
-9src/main/java/com/yobel/optimus/service/PrintService.java,5\2\52390b2bef968812e04174abf52d25c829c0996c
-f
-6src/main/java/com/yobel/optimus/util/ZPLGenerator.java,1\8\18ed0a15e6d308ad117c722578a9317fbd117f39
-g
-7src/main/java/com/yobel/optimus/util/ConfigManager.java,8\7\879cca93fd59a3987d2265b74b1e5e99e80f6346
 \
 ,src/main/java/com/yobel/optimus/MainApp.java,f\3\f3c9ab253ea4d4c9d3d92f3ceba4d0e71a43b743
 Y
@@ -68,3 +62,5 @@ q
 Asrc/main/java/com/yobel/optimus/model/entity/LineaProduccion.java,d\c\dc49798006ae79a1877feb78ff0e3fde812aad0f
 {
 Ksrc/main/java/com/yobel/optimus/model/response/LineaProduccionResponse.java,c\a\ca90a891736436a1c1d61d7bd08b6b706934b467
+g
+7src/main/java/com/yobel/optimus/lib/BarcodeDecoder.java,4\c\4c568598dacf039b8cc37f09779a7a312432f4a4
