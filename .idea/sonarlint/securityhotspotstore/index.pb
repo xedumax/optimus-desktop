@@ -64,3 +64,15 @@ Asrc/main/java/com/yobel/optimus/model/entity/LineaProduccion.java,d\c\dc497980
 Ksrc/main/java/com/yobel/optimus/model/response/LineaProduccionResponse.java,c\a\ca90a891736436a1c1d61d7bd08b6b706934b467
 g
 7src/main/java/com/yobel/optimus/lib/BarcodeDecoder.java,4\c\4c568598dacf039b8cc37f09779a7a312432f4a4
+j
+:src/main/java/com/yobel/optimus/lib/CargaFileEtq1Vert.java,2\4\2488071b73a39ae45ac334552589139e7dfc5446
+j
+:src/main/java/com/yobel/optimus/model/dto/EtiquetaDTO.java,3\e\3ef2e4658214c60b091c3e1b94c325a50ec7dcac
+f
+6src/main/java/com/yobel/optimus/file/CargaFileEtq.java,5\a\5a8aedb9ab7365e5ffca3c1984a62a6373c43585
+i
+9src/main/java/com/yobel/optimus/lib/CargaFileEtqVert.java,9\b\9bf476fa9989607400c4f93d7824822c813fd6f7
+e
+5src/main/java/com/yobel/optimus/file/FileEscribe.java,b\1\b1378752ae2a6be1630373682b0c77497c09bd08
+p
+@src/main/java/com/yobel/optimus/model/entity/ConfigEtiqueta.java,1\6\164ac4ad21c9d8f9a0cd7a35b6d7f2d583122c7a

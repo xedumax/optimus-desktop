@@ -1,6 +1,9 @@
 package com.yobel.optimus.util;
 
 public class AppConfig {
+    // Ruta física para guardar los archivos ZPL generados
+    // Puedes obtenerla de una variable de entorno o dejarla fija.
+    public static final String PATH_ETIQUETAS = "C:/Optimus/Etiquetas/Salida/";
     /**
      * Retorna la URL base dependiendo del ambiente guardado en AppContext.
      * Si no hay ambiente definido, retorna DEV por seguridad.
@@ -46,6 +49,18 @@ public class AppConfig {
     public static class Operaciones {
         public static String capturaBultos() {
             return getBaseUrl() + "/api/prd/procesoregistroinfo/procesoPedidos/capturaBultos";
+        }
+    }
+
+    // --- NUEVA SECCIÓN DE ETIQUETAS ---
+    public static class Etiquetas {
+        public static String datosImpresion(String cuenta) {
+            // Este endpoint reemplaza a la vista AIPETQ
+            return getBaseUrl() + "/api/prd/impresion/etiquetas/datos/" + cuenta;
+        }
+        public static String configuracion(String cuenta) {
+            // Este endpoint reemplaza a la vista AIPDXP
+            return getBaseUrl() + "/api/prd/impresion/etiquetas/config/" + cuenta;
         }
     }
 

@@ -1,5 +1,7 @@
 package com.yobel.optimus.controller;
 
+import com.yobel.optimus.file.CargaFileEtq;
+import com.yobel.optimus.lib.CargaFileEtqVert;
 import com.yobel.optimus.model.entity.*;
 import com.yobel.optimus.service.MaestroService;
 import com.yobel.optimus.util.AlertUtil;
@@ -160,19 +162,77 @@ public class ImpresionEtiquetaController {
     }
 
     @FXML
-    private void onAgpSelected(ActionEvent event) {// Obtenemos los valores actuales de los combos
+    private void onAgpSelected(ActionEvent event) {
+        // 0. Listar Linea de Producción
         Cuenta cuentaSeleccionada = cbCuenta.getValue();
         Agrupador agpSeleccionado = cbAgp.getValue();
+        // Obtener CIA con valor default si la selección es null
+        String cia = (cuentaSeleccionada != null) ? cuentaSeleccionada.getCtaCodigo() : "001";
 
-        // Solo y cuando cuenta y agp sean diferentes de null
+        // Solo si cuenta y agp son diferentes de null, cargar líneas
         if (cuentaSeleccionada != null && agpSeleccionado != null) {
             cbLpr.getItems().clear();
             cbLpr.setPromptText("Seleccione Linea de Prod");
-            cargarLpr();
-        } else {
-            // Si alguno es nulo, limpiamos el combo LPR para mantener la consistencia
-            cbLpr.getItems().clear();
-            cbLpr.setPromptText("Seleccione Cuenta y AGP");
+            cargarLpr(); // Supongo que este método ya usa AppConfig.Maestros.lineasProduccion(...)
+        }
+
+        // 1. Obtener la selección de la etiqueta
+        // Nota: Asegúrate que el ComboBox de etiquetas tenga un valor seleccionado
+        String seleccion = cbEtiqueta.getSelectionModel().getSelectedItem();
+        if (seleccion == null) return;
+
+        // 2. Determinar variables (Basado en tu lógica: ET1 = 001/Vertical)
+        // Aquí puedes poner un switch si tienes más etiquetas (ET1, ET2, etc.)
+        String codigoReporte = "001";
+        String vFlg = "V";
+
+        if (seleccion.equals("ET2")) { // Ejemplo para horizontal
+            vFlg = "H";
+            codigoReporte = "002";
+        }
+
+        // 3. Obtener URL desde AppConfig (Inyección directa)
+        // Usamos la nueva sección de Etiquetas que definimos para tu AppConfig
+        String urlApi = AppConfig.Etiquetas.datosImpresion(cia);
+
+        // 4. Lógica de instanciación
+        CargaFileEtq servicio = null;
+
+        if (codigoReporte.equals("001") || codigoReporte.equals("016")) {
+            if (vFlg.equals("H")) {
+                if (codigoReporte.equals("001")){
+                    //servicio = new CargaFileEtq1Horiz();
+                    System.out.println("Carga Etiqueta #1 Horizontal instanciada");
+                }else {
+                    //servicio = new CargaFileEtq2Horiz();
+                    System.out.println("Carga Etiqueta #2 Horizontal instanciada");
+                }
+            } else if (vFlg.equals("V")) {
+                // servicio = new CargaFileEtq1Vert();
+                System.out.println("Carga Etiqueta Vertical instanciada");
+            }
+        }
+
+        // 5. Invocar al servicio pasando el URL directamente como argumento
+        if (servicio != null) {
+            try {
+                // Configuramos los datos básicos en la clase base
+                servicio.setvCia(cia);
+                servicio.setvNomFil("ETQ_" + vFlg + "_" + cia + ".zpl");
+
+                // LLAMADA AL API: Pasamos la URL directamente del AppConfig al método
+                // Este método ejecutará internamente el OkHttpClient
+                servicio.salvaFile(urlApi);
+
+                System.out.println("Archivo ZPL generado en: " + AppConfig.PATH_ETIQUETAS);
+                System.out.println("Proceso completado para: " + seleccion);
+
+            } catch (Exception e) {
+                System.err.println("Error al procesar etiquetas: " + e.getMessage());
+                e.printStackTrace();
+                // Mostrar alerta al usuario (opcional)
+                // AlertaUtil.showError("Error", "No se pudo generar el archivo de etiquetas.");
+            }
         }
     }
 
