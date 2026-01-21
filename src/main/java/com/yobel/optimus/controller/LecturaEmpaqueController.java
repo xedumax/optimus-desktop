@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import okhttp3.OkHttpClient;
@@ -49,7 +50,12 @@ public class LecturaEmpaqueController {
         });
 
         // Al presionar Enter en el TextField, ejecuta el procesamiento
-        txtPedido.setOnAction(event -> ejecutarProcesamiento());
+        txtPedido.setOnAction(event -> {
+            if (!txtPedido.getText().trim().isEmpty()) {
+                ejecutarProcesamiento();
+                txtPedido.clear();
+            }
+        });
 
         // Inicializamos el detector pasándole la acción a ejecutar al detectar un scan
         scannerDetector = new ScannerDetector(codigoScaneado -> {
@@ -60,6 +66,30 @@ public class LecturaEmpaqueController {
             });
         });
 
+        txtPedido.addEventFilter(KeyEvent.KEY_TYPED, event -> {
+            long now = System.currentTimeMillis();
+            long lastTime = scannerDetector.getLastEventTime();
+            long diff = now - lastTime;
+
+            // LÓGICA DE DETECCIÓN DE ESCÁNER:
+            // Si la tecla llega muy rápido (ráfaga) y el buffer del detector apenas empieza,
+            // significa que el escáner acaba de entrar. Limpiamos el texto manual previo.
+            if (diff > 0 && diff < 50) {
+                // Si es el segundo carácter de la ráfaga, limpiamos el desastre manual
+                if (scannerDetector.getBufferLength() == 1) {
+                    Platform.runLater(() -> {
+                        // Conservamos solo el primer carácter que ya entró y lo que viene
+                        String primerChar = scannerDetector.getBufferContent();
+                        txtPedido.setText(primerChar);
+                        txtPedido.positionCaret(primerChar.length());
+                    });
+                }
+            }
+
+            // El detector sigue procesando en paralelo
+            scannerDetector.handleKeyEvent(event);
+            // NO usamos event.consume() para que el usuario pueda seguir viendo lo que escribe
+        });
     }
 
     private void cargarCuentas() {
