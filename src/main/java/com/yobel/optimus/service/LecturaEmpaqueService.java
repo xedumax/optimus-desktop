@@ -2,6 +2,7 @@ package com.yobel.optimus.service;
 
 import com.google.gson.Gson;
 import com.yobel.optimus.model.request.LecturaRequest;
+import com.yobel.optimus.model.response.GenericResponse;
 import com.yobel.optimus.util.AppContext;
 import okhttp3.*;
 
@@ -20,7 +21,7 @@ public class LecturaEmpaqueService {
     /**
      * Registra el bulto/pedido en el API
      */
-    public void registrarBulto(String url, LecturaRequest lecturaRequest) throws IOException {
+    public GenericResponse registrarBulto(String url, LecturaRequest lecturaRequest) throws IOException {
         String jsonBody = gson.toJson(lecturaRequest);
         RequestBody body = RequestBody.create(jsonBody, JSON);
 
@@ -31,9 +32,19 @@ public class LecturaEmpaqueService {
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Error HTTP " + response.code() + " al registrar bulto.");
+            // Obtenemos el cuerpo usando tu método auxiliar
+            String bodyString = getResponseBody(response);
+
+            // Mapeamos a la respuesta genérica
+            GenericResponse res = gson.fromJson(bodyString, GenericResponse.class);
+
+            // Si el HTTP es error (400, 500), pero hay un body, lo devolvemos para ver el message.
+            // Si el body es nulo, lanzamos la excepción habitual.
+            if (res == null) {
+                throw new IOException("Error HTTP " + response.code() + " sin respuesta del servidor.");
             }
+
+            return res;
         }
     }
 

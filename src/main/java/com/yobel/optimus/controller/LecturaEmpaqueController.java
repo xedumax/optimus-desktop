@@ -1,9 +1,11 @@
 package com.yobel.optimus.controller;
 
+import com.yobel.optimus.lib.ScannerDetector;
 import com.yobel.optimus.model.entity.Agrupador;
 import com.yobel.optimus.model.entity.Cuenta;
 import com.yobel.optimus.model.entity.Ventana;
 import com.yobel.optimus.model.request.LecturaRequest;
+import com.yobel.optimus.model.response.GenericResponse;
 import com.yobel.optimus.service.LecturaEmpaqueService;
 import com.yobel.optimus.service.MaestroService;
 import com.yobel.optimus.util.*;
@@ -31,6 +33,7 @@ public class LecturaEmpaqueController {
     private AnchorPane mainContentArea;
     private LecturaEmpaqueService lecturaEmpaqueService = new LecturaEmpaqueService(new OkHttpClient());
     private MaestroService maestrodeService = new MaestroService(new OkHttpClient());
+    private ScannerDetector scannerDetector;
 
     @FXML
     public void initialize() {
@@ -47,6 +50,15 @@ public class LecturaEmpaqueController {
 
         // Al presionar Enter en el TextField, ejecuta el procesamiento
         txtPedido.setOnAction(event -> ejecutarProcesamiento());
+
+        // Inicializamos el detector pasándole la acción a ejecutar al detectar un scan
+        scannerDetector = new ScannerDetector(codigoScaneado -> {
+            Platform.runLater(() -> {
+                txtPedido.clear();
+                txtPedido.setText(codigoScaneado);
+                ejecutarProcesamiento();
+            });
+        });
 
     }
 
@@ -116,8 +128,6 @@ public class LecturaEmpaqueController {
     @FXML
     private void ejecutarProcesamiento() {
         if (!validarCampos()) return;
-
-        //Lectura por codigo de barras e implementación - Se ingresará manualmente mientras tanto
         String codigo = txtPedido.getText().trim();
 
         if (codigo.isEmpty()) {
@@ -130,8 +140,6 @@ public class LecturaEmpaqueController {
 
         txtPedido.setStyle(null);
         procesarLectura(codigo);
-        txtPedido.clear();
-        txtPedido.requestFocus();
     }
 
     private void procesarLectura(String codigoBarras) {
@@ -139,33 +147,17 @@ public class LecturaEmpaqueController {
             int longitud = codigoBarras.length();
             if (longitud < 15) throw new Exception("Código no válido (muy corto)");
 
-            lblInfoEmpaque.setText("Error: Escanee una etiqueta.");
-
-            // 1. Descomposición (Lógica de negocio estable)
-            String ctr = codigoBarras.substring(0, 2);
-            String correlativo = codigoBarras.substring(longitud - 3);
-            String numPedido = codigoBarras.substring(2, longitud - 3);
-
-            String fechaFormateada = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
-            // 2. Actualizar UI directamente (Estamos en el UI Thread aquí)
-            lblInfoEmpaque.setVisible(false);
-            lblInfoEmpaque.setTextFill(Color.GREEN);
-            lblInfoEmpaque.setText(String.format
-                                    ("Último Empaque Leído:\nCTR: %s | Pedido: %s | Corr: %s",
-                                     ctr, numPedido, correlativo));
-
-            // 3. Captura de datos para el Request
+            // Captura de datos para el Request
             String codCta = cbCuenta.getValue().getCtaCodigo();
             String codAgp = cbAgp.getValue().getAgp();
             String usuario = AppContext.getUsuario();
+            String fechaFormateada = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
             LecturaRequest request = new LecturaRequest(
                     codCta, codAgp, codigoBarras, fechaFormateada,
                     usuario, fechaFormateada, AppConstants.ORIGEN_AUTOMATICO
             );
 
-            // 4. Enviar al hilo secundario
             enviarAlApi(request);
 
         } catch (Exception e) {
@@ -185,19 +177,44 @@ public class LecturaEmpaqueController {
     private void enviarAlApi(LecturaRequest request) {
         new Thread(() -> {
             try {
-                // Llamada al servicio usando AppConfig directamente como instruiste
-                lecturaEmpaqueService.registrarBulto(AppConfig.Operaciones.capturaBultos(), request);
-                lblInfoEmpaque.setVisible(true);
+                // Ahora recibimos el objeto GenericResponse
+                GenericResponse respuesta = lecturaEmpaqueService.registrarBulto(
+                        AppConfig.Operaciones.capturaBultos(), request
+                );
 
                 Platform.runLater(() -> {
-                    lblInfoEmpaque.setTextFill(Color.GREEN);
-                    //limpiarCampos();
+                    if (respuesta.isSuccess()) {
+                        // 1. Descomposición (Lógica de negocio estable)
+                        int longitud = request.getPedido().length();
+                        String ctr = request.getPedido().substring(0, 2);
+                        String correlativo = request.getPedido().substring(longitud - 3);
+                        String numPedido = request.getPedido().substring(2, longitud - 3);
+
+                        // 2. Actualizar UI directamente (Estamos en el UI Thread aquí)
+                        lblInfoEmpaque.setVisible(false);
+                        lblInfoEmpaque.setTextFill(Color.GREEN);
+                        lblInfoEmpaque.setText(String.format
+                                ("Último Empaque Leído:\nCTR: %s | Pedido: %s | Corr: %s",
+                                        ctr, numPedido, correlativo));
+                        lblInfoEmpaque.setVisible(true);
+                    } else {
+                        // Aquí capturamos el "No se encontraron registros" o cualquier error de negocio
+                        lblInfoEmpaque.setText("Aviso: " + respuesta.getMessage());
+                        lblInfoEmpaque.setTextFill(Color.ORANGE);
+                        lblInfoEmpaque.setVisible(true);
+                        AlertUtil.mostrarAdvertencia("Resultado", respuesta.getMessage());
+                    }
+                    txtPedido.clear();
+                    txtPedido.requestFocus();
                 });
+
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    lblInfoEmpaque.setText("Error al registrar en servidor");
+                    lblInfoEmpaque.setText("Error crítico de conexión");
                     lblInfoEmpaque.setTextFill(Color.RED);
-                    AlertUtil.mostrarError("Error de Registro", "No se pudo sincronizar el bulto.");
+                    txtPedido.clear();
+                    txtPedido.requestFocus();
+                    AlertUtil.mostrarError("Error", "No se pudo comunicar con el servidor.");
                 });
             }
         }).start();
