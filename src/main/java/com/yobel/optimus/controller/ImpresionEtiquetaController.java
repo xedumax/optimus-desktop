@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class ImpresionEtiquetaController {
 
     @FXML
     public void initialize() {
+
         //Llenado de Combos
         cargarCuentas();
         cargarAgrupadores();
@@ -38,6 +40,7 @@ public class ImpresionEtiquetaController {
 
         // Control de visibilidad para el bloque Opcional (Solo ET3)
         cbEtiqueta.valueProperty().addListener((obs, oldVal, newVal) -> {
+            cargarAgrupadores();
             boolean esET3 = newVal != null && newVal.startsWith("ET3");
             vbOpcional.setVisible(esET3);
             vbOpcional.setManaged(esET3);
@@ -45,12 +48,12 @@ public class ImpresionEtiquetaController {
 
         // Listener para Cuenta
         cbCuenta.valueProperty().addListener((obs, oldVal, newVal) -> {
-            validarYRefrescarLpr();
+            validarYRefrescarLpr(); //Limpiar y volver a llamar servicio
         });
 
         // Listener para AGP
         cbAgp.valueProperty().addListener((obs, oldVal, newVal) -> {
-            validarYRefrescarLpr();
+            validarYRefrescarLpr(); //Limpiar y volver a llamar servicio
         });
 
         // Los Datos de Zona Cliente y Sub-Cta Cliente | Configurar restricciones para ingresos manuales
@@ -60,20 +63,67 @@ public class ImpresionEtiquetaController {
 
     @FXML
     private void handleProcesar() {
-        // Validamos selección mínima
-        if (cbCuenta.getValue() == null || cbEtiqueta.getValue() == null) {
+        // 1. Validaciones previas
+        Cuenta cuentaSeleccionada = cbCuenta.getValue();
+        if (cuentaSeleccionada == null || cbEtiqueta.getValue() == null) {
             AlertUtil.mostrarAdvertencia("Campos incompletos", "Debe seleccionar Cuenta y Etiqueta.");
             return;
         }
 
-        // Captura de datos manuales
-        String zona = txtZonaCliente.getText().trim();
-        String subCta = txtSubCtaCliente.getText().trim();
+        String codCuenta = cuentaSeleccionada.getCtaCodigo();
+        // Obtenemos valores de los combos opcionales (si no hay selección, enviamos "null" al API)
+        String codAgp = (cbAgp.getValue() != null) ? cbAgp.getValue().getAgp() : "null";
+        String codLpr = (cbLpr.getValue() != null) ? cbLpr.getValue().getLpr() : "null";
 
-        System.out.println("Procesando Etiqueta con Zona: " + zona + " y Sub-Cta: " + subCta);
+        // 2. Iniciar proceso en hilo secundario
+        new Thread(() -> {
+            try {
+                // Construimos la URL usando AppConfig como solicitaste
+                String url = AppConfig.Operaciones.infoEtiquetas(codCuenta, codAgp, codLpr);
+                List<InfoEtiqueta> listaEtiquetas = maestroService.getInfoEtiquetas(url);
 
-        // Aquí invocarías al servicio pasando la URL de AppConfig
-        // ej: impresionService.generar(AppConfig.Operaciones.impresion(), datos);
+                if (listaEtiquetas != null && !listaEtiquetas.isEmpty()) {
+                    // OBTENER PRIMER REGISTRO
+                    InfoEtiqueta primerRegistro = listaEtiquetas.get(0);
+
+                    String pOrientacion = primerRegistro.getFlgOrienta(); // etqFlgOrienta
+                    String pOrden = primerRegistro.getFlgOrden();       // etqFlgOrden
+                    String claseEjecutar;
+
+                    // 3. Lógica de decisión de Clase
+                    if ("H".equals(pOrientacion)) {
+                        if ("001".equals(codCuenta)) {
+                            claseEjecutar = "CargaFileEtq1Horiz";
+                        } else {
+                            claseEjecutar = "CargaFileEtq2Horiz";
+                        }
+                    } else if ("V".equals(pOrientacion)) {
+                        claseEjecutar = "CargaFileEtq1Vert";
+                    } else {
+                        claseEjecutar = "";
+                    }
+
+                    // 4. Ejecutar generación de TXT
+                    if (!claseEjecutar.isEmpty()) {
+                        System.out.println("Ejecutando proceso: " + claseEjecutar);
+                        //generarArchivoTxt(claseEjecutar, listaEtiquetas);
+
+                        Platform.runLater(() ->
+                                AlertUtil.mostrarInfo("Éxito", "Proceso " + claseEjecutar + " finalizado correctamente."));
+                    } else {
+                        System.err.println("No se pudo determinar la clase para la orientación: " + pOrientacion);
+                    }
+
+                } else {
+                    Platform.runLater(() ->
+                            AlertUtil.mostrarAdvertencia("Sin datos", "El API no devolvió información para los filtros seleccionados."));
+                }
+
+            } catch (IOException e) {
+                Platform.runLater(() ->
+                        AlertUtil.mostrarError("Error de Conexión", "No se pudo obtener la información de etiquetas."));
+            }
+        }).start();
     }
 
     private void cargarCuentas() {
@@ -93,17 +143,53 @@ public class ImpresionEtiquetaController {
         }).start();
     }
 
+    private void cargarEtiquetas(){
+        cbEtiqueta.getItems().addAll(
+                "ET1: ETIQ. PED. VD 10 x 6",
+                "ET2: ETIQ. PED. VD 9 x 6",
+                "ET3: ETIQ. PED. VD 9 x 6 300 Dpi",
+                "ET4: ETIQ. PED. VD 10 x 6",
+                "ET5: ETIQ. PED. VD 10 x 6"
+        );
+    }
+
     private void cargarAgrupadores() {
         new Thread(() -> {
             try {
+                // 0. Limpiamos el combo asociado
+                cbLpr.getItems().clear();
+                cbLpr.setPromptText("Seleccione Linea de Prod");
+
                 // 1. Obtenemos la lista desde el servicio
                 List<Agrupador> lista = maestroService.getAgrupadores(AppConfig.Maestros.agrupadores());
 
                 // 2. Actualizamos la UI en el hilo principal
                 Platform.runLater(() -> {
                     if (lista != null && !lista.isEmpty()) {
+                        // 1. Limpiar datos y selección
+                        cbAgp.getSelectionModel().clearSelection();
+                        cbAgp.setValue(null);
+
+                        // 2. Cargar nuevos items
                         cbAgp.getItems().setAll(lista);
+
+                        // 3.Resetear la celda visual y el prompt
+                        cbAgp.setButtonCell(new ListCell<Agrupador>() {
+                            @Override
+                            protected void updateItem(Agrupador item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(cbAgp.getPromptText());
+                                } else {
+                                    setText(item.toString());
+                                }
+                            }
+                        });
+                        cbAgp.setPromptText("Seleccione Agrupador");
+                        System.out.println("La lista de agrupadores.");
                     } else {
+                        cbAgp.getItems().clear();
+                        cbAgp.setPromptText("Sin datos disponibles");
                         System.out.println("La lista de agrupadores llegó vacía.");
                     }
                 });
@@ -113,16 +199,6 @@ public class ImpresionEtiquetaController {
                 });
             }
         }).start();
-    }
-
-    private void cargarEtiquetas(){
-        cbEtiqueta.getItems().addAll(
-                "ET1: ETIQ. PED. VD 10 x 6",
-                "ET2: ETIQ. PED. VD 9 x 6",
-                "ET3: ETIQ. PED. VD 9 x 6 300 Dpi",
-                "ET4: ETIQ. PED. VD 10 x 6",
-                "ET5: ETIQ. PED. VD 10 x 6"
-        );
     }
 
     private void cargarLpr() {
@@ -141,13 +217,62 @@ public class ImpresionEtiquetaController {
                 Platform.runLater(() -> {
                     if (lista != null && !lista.isEmpty()) {
                         cbLpr.getItems().setAll(lista);
+
+
+                        // 1. Limpiar datos y selección
+                        cbLpr.getSelectionModel().clearSelection();
+                        cbLpr.setValue(null);
+
+                        // 2. Cargar nuevos items
+                        cbLpr.getItems().setAll(lista);
+
+                        // 3.Resetear la celda visual y el prompt
+                        cbLpr.setButtonCell(new ListCell<LineaProduccion>() {
+                            @Override
+                            protected void updateItem(LineaProduccion item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(cbLpr.getPromptText());
+                                } else {
+                                    setText(item.toString());
+                                }
+                            }
+                        });
+                        cbLpr.setPromptText("Seleccione Linea de Prod.");
+                        System.out.println("La lista de agrupadores.");
                     } else {
-                        cbLpr.getItems().clear();
                         cbLpr.setPromptText("Sin líneas disponibles");
                     }
                 });
             } catch (IOException e) {
                 Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudo cargar la información de LPR."));
+            }
+        }).start();
+    }
+
+    private void consultarInfoEtiquetas() {
+        // Obtenemos valores de los combos actuales
+        String cuenta = (cbCuenta.getValue() != null) ? cbCuenta.getValue().getCtaCodigo() : "null";
+        String agp = (cbAgp.getValue() != null) ? cbAgp.getValue().getAgp() : "null";
+        String lpr = "null"; // O del combo cbLpr si lo tienes implementado
+
+        new Thread(() -> {
+            try {
+                // Pasamos la URL directamente usando AppConfig
+                String url = AppConfig.Operaciones.infoEtiquetas(cuenta, agp, lpr);
+                List<InfoEtiqueta> info = maestroService.getInfoEtiquetas(url);
+
+                Platform.runLater(() -> {
+                    if (info != null && !info.isEmpty()) {
+                        // Aquí actualizas tu UI con la información recibida
+                        // Ejemplo: lblInfoEmpaque.setText("Etiquetas encontradas: " + info.size());
+                        System.out.println("Datos de etiquetas cargados correctamente.");
+                    }
+                });
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    System.err.println("Error al consultar InfoEtiquetas: " + e.getMessage());
+                });
             }
         }).start();
     }
@@ -162,7 +287,10 @@ public class ImpresionEtiquetaController {
     }
 
     @FXML
-    private void onAgpSelected(ActionEvent event) {
+    private void onEtiquetaSelected(ActionEvent event) {
+        //Limpiar los campos ocultos cada vez que etiqueta cambie
+
+
         // 0. Listar Linea de Producción
         Cuenta cuentaSeleccionada = cbCuenta.getValue();
         Agrupador agpSeleccionado = cbAgp.getValue();
@@ -172,8 +300,7 @@ public class ImpresionEtiquetaController {
         // Solo si cuenta y agp son diferentes de null, cargar líneas
         if (cuentaSeleccionada != null && agpSeleccionado != null) {
             cbLpr.getItems().clear();
-            cbLpr.setPromptText("Seleccione Linea de Prod");
-            cargarLpr(); // Supongo que este método ya usa AppConfig.Maestros.lineasProduccion(...)
+            cargarLpr(); // método ya usa AppConfig.Maestros.lineasProduccion(...)
         }
 
         // 1. Obtener la selección de la etiqueta
@@ -214,7 +341,7 @@ public class ImpresionEtiquetaController {
         }
 
         // 5. Invocar al servicio pasando el URL directamente como argumento
-        if (servicio != null) {
+        /*if (servicio != null) {
             try {
                 // Configuramos los datos básicos en la clase base
                 servicio.setvCia(cia);
@@ -233,7 +360,7 @@ public class ImpresionEtiquetaController {
                 // Mostrar alerta al usuario (opcional)
                 // AlertaUtil.showError("Error", "No se pudo generar el archivo de etiquetas.");
             }
-        }
+        }*/
     }
 
     /**
@@ -244,9 +371,6 @@ public class ImpresionEtiquetaController {
             cbLpr.getItems().clear();
             cbLpr.setPromptText("Seleccione Linea de Prod");
             cargarLpr();
-        } else {
-            // Opcional: Limpiar el combo LPR si uno de los padres queda nulo
-            cbLpr.getItems().clear();
         }
     }
 

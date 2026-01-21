@@ -23,7 +23,7 @@
             <ComboBox fx:id="cbCuenta" onAction="#onCuentaSelected" promptText="Seleccione Cuenta" prefWidth="350" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
             <Label text="Etiqueta :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 16;" />
-            <ComboBox fx:id="cbEtiqueta" onAction="#onAgpSelected" promptText="Seleccione Modelo" prefWidth="350" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="cbEtiqueta" onAction="#onEtiquetaSelected" promptText="Seleccione Modelo" prefWidth="350" GridPane.columnIndex="1" GridPane.rowIndex="1" />
         </GridPane>
 
         <VBox fx:id="vbOpcional" spacing="15" visible="false" managed="false"
@@ -36,7 +36,7 @@
                 <ComboBox fx:id="cbAgp" promptText="Seleccione Agrupador" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                 <Label text="LPR :" style="-fx-font-weight: bold; -fx-text-fill: #b26b00;" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <ComboBox fx:id="cbLpr" prefWidth="180" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cbLpr" promptText="Seleccione Linea de Prod" prefWidth="180" GridPane.columnIndex="3" GridPane.rowIndex="0" />
 
                 <Label text="Zona Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <TextField fx:id="txtZonaCliente" prefWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="1" />

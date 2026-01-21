@@ -71,6 +71,15 @@ public class MaestroService {
         }
     }
 
+    public List<InfoEtiqueta> getInfoEtiquetas(String url) throws IOException {
+        Request request = buildGetRequest(url);
+        try (Response response = client.newCall(request).execute()) {
+            String body = getResponseBody(response);
+            InfoEtiquetaResponse res = gson.fromJson(body, InfoEtiquetaResponse.class);
+            return (res != null && res.getData() != null) ? res.getData() : Collections.emptyList();
+        }
+    }
+
     private Request buildGetRequest(String url) {
         return new Request.Builder()
                 .url(url)

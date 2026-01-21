@@ -39,6 +39,15 @@ public class LecturaEmpaqueController {
 
         // Foco inicial sutil
         Platform.runLater(() -> cbCuenta.requestFocus());
+
+        // Listener para Combo AGP - Donde envia el focus al pedido
+        cbAgp.valueProperty().addListener((obs, oldVal, newVal) -> {
+            txtPedido.requestFocus(); // Foco listo para scanear
+        });
+
+        // Al presionar Enter en el TextField, ejecuta el procesamiento
+        txtPedido.setOnAction(event -> ejecutarProcesamiento());
+
     }
 
     private void cargarCuentas() {
@@ -92,7 +101,7 @@ public class LecturaEmpaqueController {
                     if (ventanaMatch.isPresent()) {
                         Ventana v = ventanaMatch.get();
                         txtVentana.setText(v.getNroVentana() + " - " + v.getDesVentana());
-                        txtPedido.requestFocus(); // Foco listo para la pistola
+                        txtPedido.requestFocus(); // Foco listo para scanear
                     } else {
                         txtVentana.setText(AppConstants.AGRUPADOR_SIN_VENTANA);
                         //AlertUtil.mostrarAdvertencia("Atención", "No hay ventanas activas para este agrupador.");
@@ -122,6 +131,7 @@ public class LecturaEmpaqueController {
         txtPedido.setStyle(null);
         procesarLectura(codigo);
         txtPedido.clear();
+        txtPedido.requestFocus();
     }
 
     private void procesarLectura(String codigoBarras) {
@@ -181,7 +191,7 @@ public class LecturaEmpaqueController {
 
                 Platform.runLater(() -> {
                     lblInfoEmpaque.setTextFill(Color.GREEN);
-                    limpiarCampos();
+                    //limpiarCampos();
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {

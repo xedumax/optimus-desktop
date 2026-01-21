@@ -50,6 +50,15 @@ public class AppConfig {
         public static String capturaBultos() {
             return getBaseUrl() + "/api/prd/procesoregistroinfo/procesoPedidos/capturaBultos";
         }
+        public static String infoEtiquetas(String cuenta, String agp, String lpr) {
+            // Reemplaza valores vacíos por "null" string según el API
+            String c = (cuenta == null || cuenta.isEmpty()) ? "null" : cuenta;
+            String a = (agp == null || agp.isEmpty()) ? "null" : agp;
+            String l = (lpr == null || lpr.isEmpty()) ? "null" : lpr;
+
+            return "https://optimus-dev.yobel.biz/api/prd/procesoproducto/procesoEtiquetas/InfoEtiquetas/"
+                    + c + "/" + a + "/" + l;
+        }
     }
 
     // --- NUEVA SECCIÓN DE ETIQUETAS ---
@@ -63,5 +72,6 @@ public class AppConfig {
             return getBaseUrl() + "/api/prd/impresion/etiquetas/config/" + cuenta;
         }
     }
+
 
 }
