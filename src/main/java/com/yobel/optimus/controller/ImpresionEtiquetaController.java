@@ -1,6 +1,7 @@
 package com.yobel.optimus.controller;
 
 import com.yobel.optimus.file.EtiquetaPrintService;
+import com.yobel.optimus.lib.CargaFileEtq1Horiz;
 import com.yobel.optimus.lib.CargaFileEtq1Vert;
 import com.yobel.optimus.model.entity.*;
 import com.yobel.optimus.lib.GeneradorEtiqueta;
@@ -94,11 +95,8 @@ public class ImpresionEtiquetaController {
 
                     // 3. Lógica de decisión de Clase
                     if ("H".equals(pOrientacion)) {
-                        if ("001".equals(codCuenta)) {
-                            claseEjecutar = "CargaFileEtq1Horiz";
-                        } else {
-                            claseEjecutar = "CargaFileEtq2Horiz";
-                        }
+                        //claseEjecutar = "001".equals(codCuenta) ? "CargaFileEtq1Horiz" : "CargaFileEtq2Horiz";
+                        claseEjecutar = "CargaFileEtq1Horiz";
                     } else if ("V".equals(pOrientacion)) {
                         claseEjecutar = "CargaFileEtq1Vert";
                     } else {
@@ -107,7 +105,6 @@ public class ImpresionEtiquetaController {
 
                     // 4. Ejecutar generación de TXT
                     if (!claseEjecutar.isEmpty()) {
-                        claseEjecutar = "CargaFileEtq1Vert";//******prueba
                         System.out.println("Ejecutando proceso: " + claseEjecutar);
 
                         //0. Datos
@@ -123,11 +120,11 @@ public class ImpresionEtiquetaController {
                         generarArchivoTxt(codCuenta + "_" + claseEjecutar + ".txt",
                                                         claseEjecutar, listaEtiquetas);
 
-                        printService.enviarAImpresora(AppConfig.Directorios.rutaEtiquetas());
+                        Platform.runLater(() -> {
+                            AlertUtil.mostrarInfo("Éxito", "Proceso " + claseEjecutar + " finalizado correctamente.");
+                            printService.enviarAImpresora(AppConfig.Directorios.rutaEtiquetas());
+                        });
 
-                        String finalClaseEjecutar = claseEjecutar; //****** prueba
-                        Platform.runLater(() ->
-                                AlertUtil.mostrarInfo("Éxito", "Proceso " + finalClaseEjecutar + " finalizado correctamente."));
                     } else {
                         System.err.println("No se pudo determinar la clase para la orientación: " + pOrientacion);
                     }
@@ -146,14 +143,14 @@ public class ImpresionEtiquetaController {
 
     private void generarArchivoTxt(String nombreArchivo, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
         try {
-            GeneradorEtiqueta generador;
-            if (nombreClase.equals("CargaFileEtq1Vert")) {
-                generador = new CargaFileEtq1Vert();
-            } else {
-                return;
-            }
+            GeneradorEtiqueta generador = switch (nombreClase) {
+                case "CargaFileEtq1Vert"  -> new CargaFileEtq1Vert();
+                case "CargaFileEtq1Horiz" -> new CargaFileEtq1Horiz();
+                //case "CargaFileEtq2Horiz" -> new CargaFileEtq2Horiz();
+                default -> null;
+            };
 
-            // Generar el TXT usando tu librería existente
+            if (generador == null) return;
             generador.generar(listaEtiquetas, AppConfig.Directorios.rutaEtiquetas(), nombreArchivo);
             System.out.println("Archivo TXT creado con éxito.");
 

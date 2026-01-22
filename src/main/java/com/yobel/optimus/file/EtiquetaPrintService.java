@@ -37,7 +37,7 @@ public class EtiquetaPrintService {
                             if (exitVal == 0) {
                                 AlertUtil.mostrarInfo("Impresión", "Archivo enviado a la impresora con éxito.");
                             } else {
-                                AlertUtil.mostrarError("Error", "No se pudo completar la impresión (Código: " + exitVal + ")");
+                                AlertUtil.mostrarAdvertencia("Error", "No se pudo completar la impresión (Código: " + exitVal + ")");
                             }
                         });
 
