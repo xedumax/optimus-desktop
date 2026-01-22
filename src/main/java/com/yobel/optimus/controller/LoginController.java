@@ -30,7 +30,6 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        // Quitamos el foco del campo de usuario al iniciar
         Platform.runLater(() -> rootContainer.requestFocus());
 
         //Inicializando valores para pruebas - PENDIENTE
@@ -46,10 +45,8 @@ public class LoginController {
     @FXML
     private void togglePassword() {
         boolean ver = btnVerClave.isSelected();
-
         txtClaveVisible.setVisible(ver);
         txtClave.setVisible(!ver);
-
         // 2. Lógica visual: Solo le decimos al Label si el estado "mostrando" es verdadero o falso
         lblIconoOjo.pseudoClassStateChanged(MOSTRANDO_CLAVE, ver);
     }
@@ -117,7 +114,6 @@ public class LoginController {
     }
 
     private void irAlMenu() {
-        // Ya no necesitas try-catch aquí porque NavigationUtil se encarga
         Platform.runLater(() ->
                 NavigationUtil.cambiarVentana(btnIniciar, ViewConfig.MENU, "Optimus - Menú")
         );

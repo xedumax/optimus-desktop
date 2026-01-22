@@ -93,11 +93,8 @@ public class MenuController {
 
     @FXML
     private void handleExit(javafx.scene.input.MouseEvent event) {
-        // 1. Confirmación al usuario
         boolean confirmar = AlertUtil.mostrarConfirmacion("Salir", "¿Está seguro que desea cerrar la aplicación?");
-
         if (confirmar) {
-            // 2. Cerrar la aplicación de forma limpia
             javafx.application.Platform.exit();
             System.exit(0);
         }

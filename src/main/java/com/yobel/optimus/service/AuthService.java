@@ -71,8 +71,6 @@ public class AuthService {
         }
     }
 
-    //SERVICIO A REVISAR SE SALTEA EL PASO - PENDIENTE
-
     public List<SystemItem> getSystems(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
@@ -93,7 +91,6 @@ public class AuthService {
                 System.err.println("DEBUG SYSTEMS - RESPONSE: " + responseBodyText);
                 throw new IOException("Error " + response.code() + ": " + responseBodyText);
             }
-
             // 2. Mapeo flexible
             SystemResponse res = gson.fromJson(responseBodyText, SystemResponse.class);
 
@@ -101,7 +98,6 @@ public class AuthService {
                 System.err.println("ERROR: El JSON no coincide con la clase SystemResponse. JSON: " + responseBodyText);
                 return java.util.Collections.emptyList();
             }
-
             return res.getSystems();
         } catch (JsonSyntaxException e) {
             throw new IOException("Error al parsear el JSON de sistemas: " + e.getMessage());
