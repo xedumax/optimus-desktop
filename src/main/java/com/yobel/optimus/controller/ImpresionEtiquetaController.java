@@ -1,8 +1,8 @@
 package com.yobel.optimus.controller;
 
-import com.yobel.optimus.file.CargaFileEtq;
-import com.yobel.optimus.lib.CargaFileEtqVert;
+import com.yobel.optimus.lib.CargaFileEtq1Vert;
 import com.yobel.optimus.model.entity.*;
+import com.yobel.optimus.lib.GeneradorEtiqueta;
 import com.yobel.optimus.service.MaestroService;
 import com.yobel.optimus.util.AlertUtil;
 import com.yobel.optimus.util.AppConfig;
@@ -12,9 +12,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.util.StringConverter;
 import okhttp3.OkHttpClient;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -83,11 +83,11 @@ public class ImpresionEtiquetaController {
                 List<InfoEtiqueta> listaEtiquetas = maestroService.getInfoEtiquetas(url);
 
                 if (listaEtiquetas != null && !listaEtiquetas.isEmpty()) {
-                    // OBTENER PRIMER REGISTRO
+                    // OBTENER DEL PRIMER REGISTRO
                     InfoEtiqueta primerRegistro = listaEtiquetas.get(0);
 
-                    String pOrientacion = primerRegistro.getFlgOrienta(); // etqFlgOrienta
-                    String pOrden = primerRegistro.getFlgOrden();       // etqFlgOrden
+                    String pOrientacion = primerRegistro.getEtqFlgOrienta(); // etqFlgOrienta
+                    String pOrden = primerRegistro.getEtqFlgOrden();       // etqFlgOrden
                     String claseEjecutar;
 
                     // 3. Lógica de decisión de Clase
@@ -105,11 +105,18 @@ public class ImpresionEtiquetaController {
 
                     // 4. Ejecutar generación de TXT
                     if (!claseEjecutar.isEmpty()) {
+                        claseEjecutar = "CargaFileEtq1Vert";//******prueba
                         System.out.println("Ejecutando proceso: " + claseEjecutar);
-                        //generarArchivoTxt(claseEjecutar, listaEtiquetas);
 
+                        // 1. Primero construimos el TXT
+                        generarArchivoTxt(codCuenta, claseEjecutar, listaEtiquetas);
+
+                        // 2. Luego construimos el ZPL
+                        generarArchivoZpl(codCuenta, claseEjecutar, listaEtiquetas);
+
+                        String finalClaseEjecutar = claseEjecutar; //****** prueba
                         Platform.runLater(() ->
-                                AlertUtil.mostrarInfo("Éxito", "Proceso " + claseEjecutar + " finalizado correctamente."));
+                                AlertUtil.mostrarInfo("Éxito", "Proceso " + finalClaseEjecutar + " finalizado correctamente."));
                     } else {
                         System.err.println("No se pudo determinar la clase para la orientación: " + pOrientacion);
                     }
@@ -124,6 +131,71 @@ public class ImpresionEtiquetaController {
                         AlertUtil.mostrarError("Error de Conexión", "No se pudo obtener la información de etiquetas."));
             }
         }).start();
+    }
+
+    private void generarArchivoTxt(String codCuenta, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
+        try {
+            GeneradorEtiqueta generador;
+            if (nombreClase.equals("CargaFileEtq1Vert")) {
+                generador = new CargaFileEtq1Vert();
+            } else {
+                return;
+            }
+
+            String rutaBase = AppConfig.Directorios.rutaEtiquetas();
+            File carpeta = new File(rutaBase);
+
+            // Crear ruta si no existe
+            if (!carpeta.exists()) {
+                carpeta.mkdirs();
+            }
+
+            // Generar el TXT usando tu librería existente
+            generador.generar(listaEtiquetas, rutaBase, codCuenta + "_" + nombreClase + ".txt");
+            System.out.println("Archivo TXT creado con éxito.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudo crear el archivo TXT."));
+        }
+    }
+
+    private void generarArchivoZpl(String codCuenta, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
+        try {
+            String rutaBase = AppConfig.Directorios.rutaEtiquetas();
+            String nombreZpl = codCuenta + "_" + nombreClase + ".zpl";
+            File archivoZpl = new File(rutaBase, nombreZpl);
+
+            StringBuilder zpl = new StringBuilder();
+
+            for (InfoEtiqueta etq : listaEtiquetas) {
+                zpl.append("^XA"); // Inicio de etiqueta
+
+                // Configuración de fuente y posición
+                zpl.append("^CF0,30");
+                zpl.append("^FO50,50^FDCC: ").append(etq.getEtqCuenta()).append("^FS");
+                zpl.append("^FO50,90^FDCliente: ").append(etq.getEtqNombreCliente()).append("^FS");
+
+                // Datos Decimales (Peso y Volumen)
+                zpl.append("^FO50,130^FDPeso: ").append(etq.getEtqPeso()).append(" KG^FS");
+                zpl.append("^FO350,130^FDVol: ").append(etq.getEtqVolumen()).append(" M3^FS");
+
+                // Código de Barras del Pedido
+                zpl.append("^FO100,180^BY3^BCN,80,Y,N,N^FD").append(etq.getEtqNroPedido()).append("^FS");
+
+                zpl.append("^XZ\n"); // Fin de etiqueta
+            }
+
+            // Escritura del archivo
+            try (java.io.PrintWriter out = new java.io.PrintWriter(archivoZpl)) {
+                out.print(zpl.toString());
+            }
+
+            System.out.println("Archivo ZPL creado con éxito en: " + archivoZpl.getAbsolutePath());
+
+        } catch (Exception e) {
+            System.err.println("Error al generar ZPL: " + e.getMessage());
+        }
     }
 
     private void cargarCuentas() {
@@ -288,9 +360,6 @@ public class ImpresionEtiquetaController {
 
     @FXML
     private void onEtiquetaSelected(ActionEvent event) {
-        //Limpiar los campos ocultos cada vez que etiqueta cambie
-
-
         // 0. Listar Linea de Producción
         Cuenta cuentaSeleccionada = cbCuenta.getValue();
         Agrupador agpSeleccionado = cbAgp.getValue();
@@ -303,64 +372,6 @@ public class ImpresionEtiquetaController {
             cargarLpr(); // método ya usa AppConfig.Maestros.lineasProduccion(...)
         }
 
-        // 1. Obtener la selección de la etiqueta
-        // Nota: Asegúrate que el ComboBox de etiquetas tenga un valor seleccionado
-        String seleccion = cbEtiqueta.getSelectionModel().getSelectedItem();
-        if (seleccion == null) return;
-
-        // 2. Determinar variables (Basado en tu lógica: ET1 = 001/Vertical)
-        // Aquí puedes poner un switch si tienes más etiquetas (ET1, ET2, etc.)
-        String codigoReporte = "001";
-        String vFlg = "V";
-
-        if (seleccion.equals("ET2")) { // Ejemplo para horizontal
-            vFlg = "H";
-            codigoReporte = "002";
-        }
-
-        // 3. Obtener URL desde AppConfig (Inyección directa)
-        // Usamos la nueva sección de Etiquetas que definimos para tu AppConfig
-        String urlApi = AppConfig.Etiquetas.datosImpresion(cia);
-
-        // 4. Lógica de instanciación
-        CargaFileEtq servicio = null;
-
-        if (codigoReporte.equals("001") || codigoReporte.equals("016")) {
-            if (vFlg.equals("H")) {
-                if (codigoReporte.equals("001")){
-                    //servicio = new CargaFileEtq1Horiz();
-                    System.out.println("Carga Etiqueta #1 Horizontal instanciada");
-                }else {
-                    //servicio = new CargaFileEtq2Horiz();
-                    System.out.println("Carga Etiqueta #2 Horizontal instanciada");
-                }
-            } else if (vFlg.equals("V")) {
-                // servicio = new CargaFileEtq1Vert();
-                System.out.println("Carga Etiqueta Vertical instanciada");
-            }
-        }
-
-        // 5. Invocar al servicio pasando el URL directamente como argumento
-        /*if (servicio != null) {
-            try {
-                // Configuramos los datos básicos en la clase base
-                servicio.setvCia(cia);
-                servicio.setvNomFil("ETQ_" + vFlg + "_" + cia + ".zpl");
-
-                // LLAMADA AL API: Pasamos la URL directamente del AppConfig al método
-                // Este método ejecutará internamente el OkHttpClient
-                servicio.salvaFile(urlApi);
-
-                System.out.println("Archivo ZPL generado en: " + AppConfig.PATH_ETIQUETAS);
-                System.out.println("Proceso completado para: " + seleccion);
-
-            } catch (Exception e) {
-                System.err.println("Error al procesar etiquetas: " + e.getMessage());
-                e.printStackTrace();
-                // Mostrar alerta al usuario (opcional)
-                // AlertaUtil.showError("Error", "No se pudo generar el archivo de etiquetas.");
-            }
-        }*/
     }
 
     /**

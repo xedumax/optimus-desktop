@@ -1,9 +1,12 @@
 package com.yobel.optimus.util;
 
 public class AppConfig {
-    // Ruta física para guardar los archivos ZPL generados
-    // Puedes obtenerla de una variable de entorno o dejarla fija.
-    public static final String PATH_ETIQUETAS = "C:/Optimus/Etiquetas/Salida/";
+
+    public static class Directorios {
+        public static String rutaEtiquetas() {
+            return "C:/OptimusDesk/Prd/ETQ/";
+        }
+    }
     /**
      * Retorna la URL base dependiendo del ambiente guardado en AppContext.
      * Si no hay ambiente definido, retorna DEV por seguridad.
