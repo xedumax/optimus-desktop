@@ -1,5 +1,6 @@
 package com.yobel.optimus.controller;
 
+import com.yobel.optimus.file.EtiquetaPrintService;
 import com.yobel.optimus.lib.CargaFileEtq1Vert;
 import com.yobel.optimus.model.entity.*;
 import com.yobel.optimus.lib.GeneradorEtiqueta;
@@ -29,6 +30,7 @@ public class ImpresionEtiquetaController {
 
     private AnchorPane mainContentArea;
     private MaestroService maestroService = new MaestroService(new OkHttpClient());
+    private EtiquetaPrintService printService = new EtiquetaPrintService();
 
     @FXML
     public void initialize() {
@@ -108,11 +110,20 @@ public class ImpresionEtiquetaController {
                         claseEjecutar = "CargaFileEtq1Vert";//******prueba
                         System.out.println("Ejecutando proceso: " + claseEjecutar);
 
-                        // 1. Primero construimos el TXT
-                        generarArchivoTxt(codCuenta, claseEjecutar, listaEtiquetas);
+                        //0. Datos
+                        String rutaBase = AppConfig.Directorios.rutaEtiquetas();
+                        File carpeta = new File(rutaBase);
 
-                        // 2. Luego construimos el ZPL
-                        generarArchivoZpl(codCuenta, claseEjecutar, listaEtiquetas);
+                        // Crear ruta si no existe
+                        if (!carpeta.exists()) {
+                            carpeta.mkdirs();
+                        }
+
+                        // 1. Primero construimos el TXT
+                        generarArchivoTxt(codCuenta + "_" + claseEjecutar + ".txt",
+                                                        claseEjecutar, listaEtiquetas);
+
+                        printService.enviarAImpresora(AppConfig.Directorios.rutaEtiquetas());
 
                         String finalClaseEjecutar = claseEjecutar; //****** prueba
                         Platform.runLater(() ->
@@ -133,7 +144,7 @@ public class ImpresionEtiquetaController {
         }).start();
     }
 
-    private void generarArchivoTxt(String codCuenta, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
+    private void generarArchivoTxt(String nombreArchivo, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
         try {
             GeneradorEtiqueta generador;
             if (nombreClase.equals("CargaFileEtq1Vert")) {
@@ -142,59 +153,13 @@ public class ImpresionEtiquetaController {
                 return;
             }
 
-            String rutaBase = AppConfig.Directorios.rutaEtiquetas();
-            File carpeta = new File(rutaBase);
-
-            // Crear ruta si no existe
-            if (!carpeta.exists()) {
-                carpeta.mkdirs();
-            }
-
             // Generar el TXT usando tu librería existente
-            generador.generar(listaEtiquetas, rutaBase, codCuenta + "_" + nombreClase + ".txt");
+            generador.generar(listaEtiquetas, AppConfig.Directorios.rutaEtiquetas(), nombreArchivo);
             System.out.println("Archivo TXT creado con éxito.");
 
         } catch (IOException e) {
             e.printStackTrace();
             Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudo crear el archivo TXT."));
-        }
-    }
-
-    private void generarArchivoZpl(String codCuenta, String nombreClase, List<InfoEtiqueta> listaEtiquetas) {
-        try {
-            String rutaBase = AppConfig.Directorios.rutaEtiquetas();
-            String nombreZpl = codCuenta + "_" + nombreClase + ".zpl";
-            File archivoZpl = new File(rutaBase, nombreZpl);
-
-            StringBuilder zpl = new StringBuilder();
-
-            for (InfoEtiqueta etq : listaEtiquetas) {
-                zpl.append("^XA"); // Inicio de etiqueta
-
-                // Configuración de fuente y posición
-                zpl.append("^CF0,30");
-                zpl.append("^FO50,50^FDCC: ").append(etq.getEtqCuenta()).append("^FS");
-                zpl.append("^FO50,90^FDCliente: ").append(etq.getEtqNombreCliente()).append("^FS");
-
-                // Datos Decimales (Peso y Volumen)
-                zpl.append("^FO50,130^FDPeso: ").append(etq.getEtqPeso()).append(" KG^FS");
-                zpl.append("^FO350,130^FDVol: ").append(etq.getEtqVolumen()).append(" M3^FS");
-
-                // Código de Barras del Pedido
-                zpl.append("^FO100,180^BY3^BCN,80,Y,N,N^FD").append(etq.getEtqNroPedido()).append("^FS");
-
-                zpl.append("^XZ\n"); // Fin de etiqueta
-            }
-
-            // Escritura del archivo
-            try (java.io.PrintWriter out = new java.io.PrintWriter(archivoZpl)) {
-                out.print(zpl.toString());
-            }
-
-            System.out.println("Archivo ZPL creado con éxito en: " + archivoZpl.getAbsolutePath());
-
-        } catch (Exception e) {
-            System.err.println("Error al generar ZPL: " + e.getMessage());
         }
     }
 
@@ -318,33 +283,6 @@ public class ImpresionEtiquetaController {
                 });
             } catch (IOException e) {
                 Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudo cargar la información de LPR."));
-            }
-        }).start();
-    }
-
-    private void consultarInfoEtiquetas() {
-        // Obtenemos valores de los combos actuales
-        String cuenta = (cbCuenta.getValue() != null) ? cbCuenta.getValue().getCtaCodigo() : "null";
-        String agp = (cbAgp.getValue() != null) ? cbAgp.getValue().getAgp() : "null";
-        String lpr = "null"; // O del combo cbLpr si lo tienes implementado
-
-        new Thread(() -> {
-            try {
-                // Pasamos la URL directamente usando AppConfig
-                String url = AppConfig.Operaciones.infoEtiquetas(cuenta, agp, lpr);
-                List<InfoEtiqueta> info = maestroService.getInfoEtiquetas(url);
-
-                Platform.runLater(() -> {
-                    if (info != null && !info.isEmpty()) {
-                        // Aquí actualizas tu UI con la información recibida
-                        // Ejemplo: lblInfoEmpaque.setText("Etiquetas encontradas: " + info.size());
-                        System.out.println("Datos de etiquetas cargados correctamente.");
-                    }
-                });
-            } catch (IOException e) {
-                Platform.runLater(() -> {
-                    System.err.println("Error al consultar InfoEtiquetas: " + e.getMessage());
-                });
             }
         }).start();
     }

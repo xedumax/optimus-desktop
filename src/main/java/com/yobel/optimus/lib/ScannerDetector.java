@@ -30,7 +30,6 @@ public class ScannerDetector {
         this.lastEventTime = time;
     }
 
-
     public String getBufferContent() {
         return buffer.toString();
     }
