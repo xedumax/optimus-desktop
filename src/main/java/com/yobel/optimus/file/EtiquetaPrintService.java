@@ -10,13 +10,6 @@ import java.io.InputStreamReader;
 
 public class EtiquetaPrintService {
     public void enviarAImpresora(String rutaArchivo) {
-        String nombreZebra = "ZebraZPL"; // El nombre de la impresora en Windows
-        if (!existeImpresora(nombreZebra)) {
-            //AlertUtil.mostrarAdvertencia("Configuración Faltante",
-            System.out.println("La impresora '" + nombreZebra + "' no está instalada en este equipo.\n" +
-                            "Por favor, verifique el nombre en Panel de Control.");
-           // return;
-        }
 
         Platform.runLater(() -> {
             new Thread(() -> {
