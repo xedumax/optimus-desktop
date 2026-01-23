@@ -117,12 +117,12 @@ public class ImpresionEtiquetaController {
                         }
 
                         // 1. Primero construimos el TXT
-                        generarArchivoTxt(codCuenta + "_" + claseEjecutar + ".txt",
-                                                        claseEjecutar, listaEtiquetas);
+                        String fileName = codCuenta + "_" + claseEjecutar + ".txt";
+                        generarArchivoTxt(fileName, claseEjecutar, listaEtiquetas);
 
                         Platform.runLater(() -> {
                             AlertUtil.mostrarInfo("Éxito", "Proceso " + claseEjecutar + " finalizado correctamente.");
-                            printService.enviarAImpresora(AppConfig.Directorios.rutaEtiquetas());
+                            printService.enviarAImpresora(AppConfig.Directorios.rutaEtiquetas()+fileName);
                         });
 
                     } else {
