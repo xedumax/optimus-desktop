@@ -53,14 +53,16 @@ public class AppConfig {
         public static String capturaBultos() {
             return getBaseUrl() + "/api/prd/procesoregistroinfo/procesoPedidos/capturaBultos";
         }
-        public static String infoEtiquetas(String cuenta, String agp, String lpr) {
+        public static String infoEtiquetas(String cuenta, String usuario, String agp, String lpr) {
             // Reemplaza valores vacíos por "null" string según el API
             String c = (cuenta == null || cuenta.isEmpty()) ? "null" : cuenta;
+            String u = (usuario == null || usuario.isEmpty()) ? "null" : usuario;
             String a = (agp == null || agp.isEmpty()) ? "null" : agp;
             String l = (lpr == null || lpr.isEmpty()) ? "null" : lpr;
 
+            // Se inserta el parámetro 'u' (usuario) después de la cuenta
             return "https://optimus-dev.yobel.biz/api/prd/procesoproducto/procesoEtiquetas/InfoEtiquetas/"
-                    + c + "/" + a + "/" + l;
+                    + c + "/" + u + "/" + a + "/" + l;
         }
     }
 
