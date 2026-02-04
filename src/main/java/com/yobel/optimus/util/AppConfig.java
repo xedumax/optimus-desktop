@@ -9,7 +9,7 @@ public class AppConfig {
     }
     /**
      * Retorna la URL base dependiendo del ambiente guardado en AppContext.
-     * Si no hay ambiente definido, retorna DEV por seguridad.
+     * Si no hay ambiente definido, retorna DEV por seguridad..
      */
     public static String getBaseUrl() {
         String env = AppContext.getAmbiente();

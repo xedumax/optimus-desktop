@@ -8,6 +8,7 @@ import com.yobel.optimus.lib.GeneradorEtiqueta;
 import com.yobel.optimus.service.MaestroService;
 import com.yobel.optimus.util.AlertUtil;
 import com.yobel.optimus.util.AppConfig;
+import com.yobel.optimus.util.AppContext;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -82,7 +83,7 @@ public class ImpresionEtiquetaController {
         new Thread(() -> {
             try {
                 // Construimos la URL usando AppConfig como solicitaste
-                String url = AppConfig.Operaciones.infoEtiquetas(codCuenta, codAgp, codLpr);
+                String url = AppConfig.Operaciones.infoEtiquetas(codCuenta, AppContext.getUsuario().toUpperCase(),codAgp, codLpr);
                 List<InfoEtiqueta> listaEtiquetas = maestroService.getInfoEtiquetas(url);
 
                 if (listaEtiquetas != null && !listaEtiquetas.isEmpty()) {
@@ -94,14 +95,18 @@ public class ImpresionEtiquetaController {
                     String claseEjecutar;
 
                     // 3. Lógica de decisión de Clase
-                    if ("H".equals(pOrientacion)) {
-                        //claseEjecutar = "001".equals(codCuenta) ? "CargaFileEtq1Horiz" : "CargaFileEtq2Horiz";
-                        claseEjecutar = "CargaFileEtq1Horiz";
-                    } else if ("V".equals(pOrientacion)) {
-                        claseEjecutar = "CargaFileEtq1Vert";
+                    boolean esET1 = cbEtiqueta.getValue() != null && cbEtiqueta.getValue().startsWith("ET1");
+
+                    if(esET1) {
+                        claseEjecutar =  "CargaFileEtq2Horiz";
                     } else {
-                        claseEjecutar = "";
-                    }
+                    claseEjecutar = switch (pOrientacion) {
+                        case "H" -> "CargaFileEtq1Horiz";
+                        case "V" -> "CargaFileEtq1Vert";
+                        default  -> "";
+                    };
+                }
+
 
                     // 4. Ejecutar generación de TXT
                     if (!claseEjecutar.isEmpty()) {
