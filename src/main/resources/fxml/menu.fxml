@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="450.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.yobel.optimus.controller.MenuController">
     <children>
         <MenuBar>
@@ -14,6 +14,9 @@
                     </items>
                 </Menu>
                 <Menu text="_Etiquetas Generales">
+                    <items>
+                        <MenuItem text="Generar Etiquetas" onAction="#abrirGenerarEtiquetas"/>
+                    </items>
                     <items>
                         <MenuItem text="Imprimir Etiquetas" onAction="#abrirImprimirEtiquetas"/>
                     </items>

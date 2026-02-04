@@ -12,6 +12,7 @@ public class ViewConfig {
     // Vistas secundarias o módulos
     public static final String LECTURA_EMPAQUE = FXML_PATH + "lectura-empaque.fxml";
     public static final String IMPRESION_ETIQUETAS = FXML_PATH + "impresion-etiqueta.fxml";
+    public static final String GENERAR_ETIQUETAS = FXML_PATH + "generar-etiqueta.fxml";
 
 
 }

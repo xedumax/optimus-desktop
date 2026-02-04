@@ -8,7 +8,7 @@
 <?import javafx.scene.image.Image?>
 
 <VBox fx:id="rootContainer" focusTraversable="true" stylesheets="@../css/login.css" alignment="TOP_CENTER" spacing="10.0" style="-fx-background-color: white;"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.yobel.optimus.controller.LoginController">
 
     <children>

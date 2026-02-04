@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.yobel.optimus.controller.GenerarEtiquetaController"
+      alignment="TOP_CENTER" spacing="18.0"
+      style="-fx-background-color: white;">
+    <padding>
+        <Insets top="20" right="24" bottom="24" left="24"/>
+    </padding>
+
+    <!-- Barra superior (botón Volver a la derecha) -->
+    <HBox alignment="TOP_RIGHT">
+        <Button text="Volver" onAction="#volverAlMenu"
+                style="-fx-background-color: #455a64; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 18; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- Título -->
+    <Text text="GENERACIÓN DE ETIQUETAS"
+          style="-fx-font-size: 22; -fx-font-weight: bold;"/>
+
+    <!-- Contenedor central -->
+    <VBox alignment="CENTER" spacing="16" maxWidth="680">
+
+        <!-- GRID PRINCIPAL -->
+        <GridPane hgap="12" vgap="12" alignment="CENTER_LEFT">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="22"/>
+                <ColumnConstraints percentWidth="78"/>
+            </columnConstraints>
+
+            <!-- Cuenta -->
+            <Label text="Cuenta :" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                   style="-fx-font-size: 14;"/>
+            <ComboBox fx:id="cbCuenta" promptText="Seleccione cuenta"
+                      prefWidth="420"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <!-- Fecha Proceso -->
+            <Label text="Fecha Proceso :" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                   style="-fx-font-size: 14;"/>
+            <DatePicker fx:id="dpFechaProceso" promptText="Seleccione fecha"
+                        prefWidth="220"
+                        GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <!-- Lote Proceso -->
+            <Label text="Lote Proceso :" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                   style="-fx-font-size: 14;"/>
+            <TextField fx:id="txtLoteProceso" promptText="Ingrese lote"
+                       prefWidth="220"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <!-- AGP / LPR -->
+            <Label text="AGP :" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                   style="-fx-font-size: 14;"/>
+            <HBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                <children>
+                    <ComboBox fx:id="cbAgp" promptText="Seleccione Agrupador" prefWidth="200"/>
+                    <Label text="LPR :" style="-fx-font-size: 14; -fx-padding: 0 4 0 12;"/>
+                    <ComboBox fx:id="cbLpr" promptText="Seleccione Línea" prefWidth="200"/>
+                </children>
+            </HBox>
+
+            <!-- Orden -->
+            <Label text="Orden :" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                   style="-fx-font-size: 14;"/>
+            <ComboBox fx:id="cbOrden" promptText="Seleccione Orden"
+                      prefWidth="220"
+                      GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        </GridPane>
+
+        <!-- BLOQUE OPCIONAL -->
+        <VBox spacing="12" style="-fx-border-color: #bababa; -fx-border-radius: 6; -fx-border-width: 1; -fx-padding: 16;">
+            <!-- “Etiqueta” de bloque -->
+            <Label text="Opcional"
+                   style="-fx-font-weight: bold; -fx-translate-y: -24; -fx-background-color: white; -fx-padding: 0 8; -fx-font-size: 12; -fx-alignment: CENTER_LEFT;"/>
+
+            <GridPane hgap="12" vgap="10" alignment="CENTER_LEFT" style="-fx-translate-y: -12;">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="22"/>
+                    <ColumnConstraints percentWidth="28"/>
+                    <ColumnConstraints percentWidth="22"/>
+                    <ColumnConstraints percentWidth="28"/>
+                </columnConstraints>
+
+                <!-- Fila 1 -->
+                <Label text="Zona Cliente:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtZonaCliente" prefWidth="180" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Sub-Cta.Cliente:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtSubCtaCliente" prefWidth="180" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                <!-- Fila 2 -->
+                <Label text="Sec.Pedido Desde:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtSecPedidoDesde" prefWidth="180" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Hasta:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtSecPedidoHasta" prefWidth="180" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                <!-- Fila 3 -->
+                <Label text="Cod. Cliente:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtCodCliente" prefWidth="180" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Por Pedido:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtPorPedido" prefWidth="180" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+            </GridPane>
+        </VBox>
+
+        <!-- Botón principal -->
+        <Button fx:id="btnProcesar" text="Procesar" onAction="#handleProcesar"
+                prefHeight="42" prefWidth="160"
+                style="-fx-background-color: black; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 22; -fx-cursor: hand;">
+            <VBox.margin>
+                <Insets top="6"/>
+            </VBox.margin>
+        </Button>
+
+    </VBox>
+</VBox>

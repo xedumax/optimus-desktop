@@ -59,8 +59,11 @@ public class AppConfig {
             String a = (agp == null || agp.isEmpty()) ? "null" : agp;
             String l = (lpr == null || lpr.isEmpty()) ? "null" : lpr;
 
-            return "https://optimus-dev.yobel.biz/api/prd/procesoproducto/procesoEtiquetas/InfoEtiquetas/"
+            return getBaseUrl() +"/api/prd/procesoproducto/procesoEtiquetas/InfoEtiquetas/"
                     + c + "/" + a + "/" + l;
+        }
+        public static String generarEtiquetas() {
+            return getBaseUrl() +"/api/prd/procesoproducto/procesoEtiquetas/generar";
         }
     }
 

@@ -1,0 +1,262 @@
+package com.yobel.optimus.controller;
+
+import com.yobel.optimus.model.entity.Agrupador;
+import com.yobel.optimus.model.entity.Cuenta;
+import com.yobel.optimus.model.entity.LineaProduccion;
+import com.yobel.optimus.service.MaestroService;
+import com.yobel.optimus.util.AlertUtil;
+import com.yobel.optimus.util.AppConfig;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import okhttp3.OkHttpClient;
+
+import java.io.IOException;
+import java.util.List;
+
+public class GenerarEtiquetaController {
+
+    @FXML private ComboBox<Cuenta> cbCuenta;
+    @FXML private ComboBox<Agrupador> cbAgp;
+    @FXML private ComboBox<LineaProduccion> cbLpr; // Lista de impresoras o similar
+    @FXML private TextField txtZonaCliente, txtSubCtaCliente;
+    @FXML private VBox vbOpcional;
+
+    private AnchorPane mainContentArea;
+    private MaestroService maestroService = new MaestroService(new OkHttpClient());
+
+    @FXML
+    public void initialize() {
+
+        //Llenado de Combos
+        cargarCuentas();
+        cargarAgrupadores();
+        // Listener para Cuenta
+        cbCuenta.valueProperty().addListener((obs, oldVal, newVal) -> {
+            validarYRefrescarLpr(); //Limpiar y volver a llamar servicio
+        });
+
+        // Listener para AGP
+        cbAgp.valueProperty().addListener((obs, oldVal, newVal) -> {
+            validarYRefrescarLpr(); //Limpiar y volver a llamar servicio
+        });
+
+        // Los Datos de Zona Cliente y Sub-Cta Cliente | Configurar restricciones para ingresos manuales
+        configurarTextField(txtZonaCliente, 8);
+        configurarTextField(txtSubCtaCliente, 2);
+    }
+
+    @FXML
+    private void handleProcesar() {
+        // 1. Validaciones previas
+        Cuenta cuentaSeleccionada = cbCuenta.getValue();
+        if (cuentaSeleccionada == null) {
+            AlertUtil.mostrarAdvertencia("Campos incompletos", "Debe seleccionar Cuenta.");
+            return;
+        }
+
+        String codCuenta = cuentaSeleccionada.getCtaCodigo();
+        // Obtenemos valores de los combos opcionales (si no hay selección, enviamos "null" al API)
+        String codAgp = (cbAgp.getValue() != null) ? cbAgp.getValue().getAgp() : "null";
+        String codLpr = (cbLpr.getValue() != null) ? cbLpr.getValue().getLpr() : "null";
+
+    }
+
+    private void cargarCuentas() {
+        new Thread(() -> {
+            try {
+                List<Cuenta> listaFiltrada = maestroService.getCuentas(AppConfig.Maestros.cuentas());
+                Platform.runLater(() -> {
+                    if (listaFiltrada != null && !listaFiltrada.isEmpty()) {
+                        cbCuenta.getItems().setAll(listaFiltrada);
+                    } else {
+                        cbCuenta.setPromptText("Sin cuentas disponibles");
+                    }
+                });
+            } catch (IOException e) {
+                Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudieron cargar las cuentas."));
+            }
+        }).start();
+    }
+
+    private void cargarAgrupadores() {
+        new Thread(() -> {
+            try {
+                // 0. Limpiamos el combo asociado
+                cbLpr.getItems().clear();
+                cbLpr.setPromptText("Seleccione Linea de Prod");
+
+                // 1. Obtenemos la lista desde el servicio
+                List<Agrupador> lista = maestroService.getAgrupadores(AppConfig.Maestros.agrupadores());
+
+                // 2. Actualizamos la UI en el hilo principal
+                Platform.runLater(() -> {
+                    if (lista != null && !lista.isEmpty()) {
+                        // 1. Limpiar datos y selección
+                        cbAgp.getSelectionModel().clearSelection();
+                        cbAgp.setValue(null);
+
+                        // 2. Cargar nuevos items
+                        cbAgp.getItems().setAll(lista);
+
+                        // 3.Resetear la celda visual y el prompt
+                        cbAgp.setButtonCell(new ListCell<Agrupador>() {
+                            @Override
+                            protected void updateItem(Agrupador item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(cbAgp.getPromptText());
+                                } else {
+                                    setText(item.toString());
+                                }
+                            }
+                        });
+                        cbAgp.setPromptText("Seleccione Agrupador");
+                        System.out.println("La lista de agrupadores.");
+                    } else {
+                        cbAgp.getItems().clear();
+                        cbAgp.setPromptText("Sin datos disponibles");
+                        System.out.println("La lista de agrupadores llegó vacía.");
+                    }
+                });
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    System.err.println("Error al cargar combos: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    private void cargarLpr() {
+        // Protección adicional: solo procede si ambos tienen valor
+        if (cbCuenta.getValue() == null || cbAgp.getValue() == null) return;
+
+        String codCuenta = cbCuenta.getValue().getCtaCodigo();
+        String codAgp = cbAgp.getValue().getAgp();
+
+        new Thread(() -> {
+            try {
+                // Se construye la URL dinámica desde AppConfig pasando los 2 parámetros
+                String url = AppConfig.Maestros.lineasProduccion(codCuenta, codAgp);
+                List<LineaProduccion> lista = maestroService.getLineasProduccion(url);
+
+                Platform.runLater(() -> {
+                    if (lista != null && !lista.isEmpty()) {
+                        cbLpr.getItems().setAll(lista);
+
+
+                        // 1. Limpiar datos y selección
+                        cbLpr.getSelectionModel().clearSelection();
+                        cbLpr.setValue(null);
+
+                        // 2. Cargar nuevos items
+                        cbLpr.getItems().setAll(lista);
+
+                        // 3.Resetear la celda visual y el prompt
+                        cbLpr.setButtonCell(new ListCell<LineaProduccion>() {
+                            @Override
+                            protected void updateItem(LineaProduccion item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(cbLpr.getPromptText());
+                                } else {
+                                    setText(item.toString());
+                                }
+                            }
+                        });
+                        cbLpr.setPromptText("Seleccione Linea de Prod.");
+                        System.out.println("La lista de agrupadores.");
+                    } else {
+                        cbLpr.setPromptText("Sin líneas disponibles");
+                    }
+                });
+            } catch (IOException e) {
+                Platform.runLater(() -> AlertUtil.mostrarError("Error", "No se pudo cargar la información de LPR."));
+            }
+        }).start();
+    }
+
+    @FXML
+    private void onCuentaSelected(ActionEvent event) {
+        Cuenta seleccionada = cbCuenta.getSelectionModel().getSelectedItem();
+
+        if (seleccionada != null) {
+            System.out.println("Cuenta seleccionada: " + seleccionada.toString());
+        }
+    }
+
+    @FXML
+    private void onEtiquetaSelected(ActionEvent event) {
+        // 0. Listar Linea de Producción
+        Cuenta cuentaSeleccionada = cbCuenta.getValue();
+        Agrupador agpSeleccionado = cbAgp.getValue();
+        // Obtener CIA con valor default si la selección es null
+        String cia = (cuentaSeleccionada != null) ? cuentaSeleccionada.getCtaCodigo() : "001";
+
+        // Solo si cuenta y agp son diferentes de null, cargar líneas
+        if (cuentaSeleccionada != null && agpSeleccionado != null) {
+            cbLpr.getItems().clear();
+            cargarLpr(); // método ya usa AppConfig.Maestros.lineasProduccion(...)
+        }
+
+    }
+
+    /**
+     * Método intermedio para validar la condición antes de llamar a la carga
+     */
+    private void validarYRefrescarLpr() {
+        if (cbCuenta.getValue() != null && cbAgp.getValue() != null) {
+            cbLpr.getItems().clear();
+            cbLpr.setPromptText("Seleccione Linea de Prod");
+            cargarLpr();
+        }
+    }
+
+    /**
+     * Aplica filtro de longitud máxima y fuerza mayúsculas
+     */
+    private void configurarTextField(TextField textField, int maxLength) {
+        textField.setTextFormatter(new TextFormatter<>(change -> {
+            // 1. Convertir a mayúsculas automáticamente
+            change.setText(change.getText().toUpperCase());
+
+            // 2. Validar longitud máxima
+            int nuevaLongitud = change.getControlNewText().length();
+            if (nuevaLongitud <= maxLength) {
+                return change;
+            }
+            return null; // Rechaza el cambio si excede el límite
+        }));
+    }
+
+    @FXML
+    private void volverAlMenu() {
+        // 1. Limpiamos los datos del formulario por seguridad
+        limpiarCampos();
+
+        // 2. Verificamos que la referencia al contenedor no sea nula
+        if (mainContentArea != null) {
+            // Removemos la vista actual (Lectura) del contenedor del Menú
+            mainContentArea.getChildren().clear();
+            System.out.println("Vista de lectura removida. El área central queda limpia.");
+        } else {
+            // Si llega aquí, es porque olvidaste el setMainContentArea en el MenuController
+            System.err.println("Error: No se tiene referencia al contentArea.");
+        }
+    }
+
+    private void limpiarCampos() {
+        txtSubCtaCliente.clear();
+        txtZonaCliente.clear();
+    }
+
+    public void setMainContentArea(AnchorPane contentArea) {
+        this.mainContentArea = contentArea;
+    }
+}

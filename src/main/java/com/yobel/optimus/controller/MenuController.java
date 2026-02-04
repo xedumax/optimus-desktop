@@ -92,6 +92,37 @@ public class MenuController {
     }
 
     @FXML
+    private void abrirGenerarEtiquetas(ActionEvent actionEvent) {
+        new Thread(() -> {
+            try {
+                // Validación de permisos
+                List<SystemItem> listaSistemas = authService.getSystems(AppConfig.Auth.sistemas());
+                boolean tienePermiso = listaSistemas.stream()
+                        .anyMatch(s -> AppConstants.SYSTEM_NAME_OHS.equalsIgnoreCase(s.getSystemName()));
+
+                if (tienePermiso) {
+                    //Éxito: Usamos NavigationUtil para inyectar la vista
+                    Platform.runLater(() -> {
+                        // 1. Cargamos la vista y obtenemos su controlador
+                        GenerarEtiquetaController controller = NavigationUtil.cargarDentroDe(contentArea, ViewConfig.GENERAR_ETIQUETAS);
+
+                        // 2. Pasamos la referencia del contenedor al hijo
+                        if (controller != null) {
+                            controller.setMainContentArea(contentArea);
+                        }
+                    });
+                } else {
+                    // 3. Fallo de permisos: Usamos AlertUtil
+                    Platform.runLater(() -> AlertUtil.mostrarAdvertencia("Acceso Denegado", "No tiene permisos para el módulo OHS."));
+                }
+            } catch (IOException e) {
+                // 4. Error de red: Usamos AlertUtil
+                Platform.runLater(() -> AlertUtil.mostrarError("Error de Conexión", "No se pudo validar el acceso: " + e.getMessage()) );
+            }
+        }).start();
+    }
+
+    @FXML
     private void handleExit(javafx.scene.input.MouseEvent event) {
         boolean confirmar = AlertUtil.mostrarConfirmacion("Salir", "¿Está seguro que desea cerrar la aplicación?");
         if (confirmar) {
